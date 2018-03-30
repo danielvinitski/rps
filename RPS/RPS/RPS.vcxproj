@@ -115,7 +115,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Board.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="Piece.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="player1.rps_board" />
+    <None Include="player2.rps_board" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -9,6 +9,7 @@ class Board
 public:
 	Board(int m, int n);
 	bool AddPiece(Piece piece);
+	bool initBoard();
 	~Board();
 	
 };
