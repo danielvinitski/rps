@@ -15,3 +15,13 @@ Piece::Piece(PieceType type, bool isJoker, int x, int y, int player)
 Piece::~Piece()
 {
 }
+
+int Piece::getX() {
+	return x;
+}
+int Piece::getY() {
+	return y;
+}
+Piece::PieceType Piece::getType() {
+	return type;
+}
