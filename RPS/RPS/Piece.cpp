@@ -5,7 +5,7 @@
 Piece::Piece(PieceType type, bool isJoker, int x, int y, int player)
 {
 	type = type;
-	isJoker = isJoker;
+	joker = isJoker;
 	x = x;
 	y = y;
 	player = player;
@@ -24,4 +24,7 @@ int Piece::getY() {
 }
 Piece::PieceType Piece::getType() {
 	return type;
+}
+bool Piece::isJoker() {
+	return joker;
 }
