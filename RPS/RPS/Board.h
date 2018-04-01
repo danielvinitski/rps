@@ -13,6 +13,5 @@ public:
 	bool AddPiece(Piece piece);
 	bool initBoard();
 	~Board();
-	
 };
 

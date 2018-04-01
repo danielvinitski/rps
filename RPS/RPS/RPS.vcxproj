@@ -111,6 +111,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Board.h" />
+    <ClInclude Include="main.h" />
     <ClInclude Include="Piece.h" />
   </ItemGroup>
   <ItemGroup>
