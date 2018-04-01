@@ -24,30 +24,32 @@ bool Board::AddPiece(Piece piece) {
 		return false;
 	}
 
-
-	switch (piece.getType()) {
-	case 'R':
-		if (maxR < ++totalR) {
-			return false;
+	if (!piece.isJoker()) {
+		switch (piece.getType()) {
+		case 'R':
+			if (maxR < ++totalR) {
+				return false;
+			}
+		case 'P':
+			if (maxP < ++totalP) {
+				return false;
+			}
+		case 'S':
+			if (maxS < ++totalS) {
+				return false;
+			}
+		case 'F':
+			if (maxF < ++totalF) {
+				return false;
+			}
+		case 'B':
+			if (maxB < ++totalB) {
+				return false;
+			}
 		}
-	case 'P':
-		if (maxP < ++totalP) {
-			return false;
-		}
-	case 'S':
-		if (maxS < ++totalS) {
-			return false;
-		}
-	case 'J':
+	}
+	else {
 		if (maxJ < ++totalJ) {
-			return false;
-		}
-	case 'F':
-		if (maxF < ++totalF) {
-			return false;
-		}
-	case 'B':
-		if (maxB < ++totalB) {
 			return false;
 		}
 	}
