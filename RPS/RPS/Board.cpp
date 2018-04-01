@@ -58,12 +58,20 @@ bool Board::AddPiece(Piece piece) {
 
 bool Board::initBoard()
 {	
+	int x, y;
+	bool joker;
+
+	bool feof = false;
 	char line[10];
 	//read file of player a
 	ifstream player1File("player1.rps_board");
-	player1File.getline(line, 10);
-
-
+	while (!feof) {
+		player1File.getline(line, 10);
+		
+		if (player1File.eof()) {
+			feof = true;
+		}
+	}
 
 	return false;
 }
