@@ -3,10 +3,11 @@
 
 
 
-Piece::Piece(PieceType type_, bool isJoker_, int x_, int y_, Player*& player_)
+Piece::Piece(PieceType type_, bool isJoker_, int x_, int y_, Player*& player_, bool isRevealed_)
 {
 	type = type_;
 	joker = isJoker_;
+	revealed = isRevealed_;
 	x = x_;
 	y = y_;
 	player = player_;
@@ -34,4 +35,7 @@ void Piece::setType(Piece::PieceType newType) {
 }
 bool Piece::isJoker() {
 	return joker;
+}
+bool Piece::isRevealed() {
+	return revealed;
 }

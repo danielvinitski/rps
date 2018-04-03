@@ -8,7 +8,7 @@ int main() {
 	Board board = Board(10,10);
 	if (!board.initBoard())
 		cout << "problem with the board init" << endl;
-	board.printBoard("show-all", 50);
+	board.printBoard("show 1", 50);
 }
 
 

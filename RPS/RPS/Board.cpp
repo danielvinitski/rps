@@ -148,7 +148,7 @@ bool Board::loadPlayer(ifstream& player, int playerNum)
 		}
 		x = line[2] - '0';
 		y = line[4] - '0';
-		Piece *soldier= new Piece(pt, joker, x, y, playerObj);
+		Piece *soldier= new Piece(pt, joker, x, y, playerObj,false);
 		if (!AddPiece(*soldier))
 			return false;
 	}
@@ -205,28 +205,28 @@ void Board::printSquare(int i, int j, string mode) {
 	
 	if (board[i][j][0]) {
 		k = 10;
-		pieceType = getPieceStringFromEnum((*(board[i][j][0])).getType());
-		if ((*(board[i][j][0])).isJoker())
-			k += 8;
+		if ((mode.compare("show 2") == 0 || mode.compare("show-only-known-info") == 0) && !((*(board[i][j][0])).isRevealed()))
+			pieceType = 'H';
+		else {
+			pieceType = getPieceStringFromEnum((*(board[i][j][0])).getType());
+			if ((*(board[i][j][0])).isJoker())
+				k += 8;
+		}
 	}
 	if (board[i][j][1]) {
 		k = 12;
-		pieceType = getPieceStringFromEnum((*(board[i][j][1])).getType());
-		if ((*(board[i][j][1])).isJoker())
-			k += 8;
+		if ((mode.compare("show 1") == 0 || mode.compare("show-only-known-info") == 0) && !(*(board[i][j][1])).isRevealed())
+			pieceType = 'H';
+		else {
+			pieceType = getPieceStringFromEnum((*(board[i][j][1])).getType());
+			if ((*(board[i][j][1])).isJoker())
+				k += 8;
+		}
 	}
 	SetConsoleTextAttribute(hConsole, k);
 	cout << pieceType;
 	SetConsoleTextAttribute(hConsole, 15);
 	cout << " | ";
-	if (mode.compare("show 1") == 0) {
-
-	}
-	else if (mode.compare("show 2") == 0) {
-	}
-	else {
-
-	}
 }
 
 Board::~Board()
