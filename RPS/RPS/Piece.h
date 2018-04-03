@@ -9,6 +9,7 @@ public:
 	int getPlayer();
 	bool isJoker();
 	PieceType getType();
+	void Piece::setType(Piece::PieceType newType);
 	~Piece();
 
 private:
