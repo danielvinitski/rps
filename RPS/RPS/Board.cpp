@@ -183,7 +183,10 @@ void Board::printSquare(int i, int j, string mode) {
 
 Board::~Board()
 {
-	for (int i = 0; i < m; i++)
+	for (int i = 0; i < m; i++) {
+		for (int j = 0; j < n; i++)
+			delete[]board[i][j];
 		delete[]board[i];
+	}
 	delete[]board;
 }
