@@ -2,13 +2,13 @@
 
 
 
-Piece::Piece(PieceType type, bool isJoker, int x, int y, int player)
+Piece::Piece(PieceType type_, bool isJoker_, int x_, int y_, int player_)
 {
-	type = type;
-	joker = isJoker;
-	x = x;
-	y = y;
-	player = player;
+	type = type_;
+	joker = isJoker_;
+	x = x_;
+	y = y_;
+	player = player_;
 }
 
 
