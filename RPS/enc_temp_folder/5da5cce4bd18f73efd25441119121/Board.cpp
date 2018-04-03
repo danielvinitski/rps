@@ -3,9 +3,13 @@
 #include <string>
 #include<iostream>
 #include<fstream>
+#include <windows.h>
 
 using namespace std;
 
+const string red("\033[0;31m");
+const string green("\033[1;32m");
+const string reset("\033[0m");
 
 Board::Board(int _m, int _n)
 {
@@ -33,6 +37,16 @@ Piece::PieceType getPieceTypeFromChar(char piece) {
 		return Piece::PieceType::Bomb;
 	case 'F':
 		return Piece::PieceType::Flag;
+	}
+}
+
+char getPieceStringFromEnum(Piece::PieceType pieceType) {
+	switch (pieceType) {
+	case Piece::PieceType::Rock: return 'R';
+	case Piece::PieceType::Papper: return 'P';
+	case Piece::PieceType::Scissors: return 'S';
+	case Piece::PieceType::Flag: return 'F';
+	case Piece::PieceType::Bomb: return 'B';
 	}
 }
 
@@ -71,7 +85,7 @@ bool Board::AddPiece(Piece& piece) {
 					return false;
 				}
 				break;
-			}
+		}
 	}
 	else {
 		if (maxJ < ++totalJ) {
@@ -97,7 +111,7 @@ void Board::MovePiece(int fromX, int fromY, int toX, int toY, int player, Piece:
 	}
 }
 
-bool Board::loadPlayer(ifstream& player)
+bool Board::loadPlayer(ifstream& player, int playerNum)
 {
 	int x, y;
 	bool joker;
@@ -163,6 +177,21 @@ bool Board::printBoard(string mode, int delay)
 }
 
 void Board::printSquare(int i, int j, string mode) {
+	HANDLE hConsole;
+	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	int k;
+	
+	if (board[i][j][0]) {
+		k = 10;
+		SetConsoleTextAttribute(hConsole, k);
+		cout << getPieceStringFromEnum((*(board[i][j][0])).getType()) << "|";
+	}
+	if (board[i][j][1]) {
+		k = 140;
+		SetConsoleTextAttribute(hConsole, k);
+		cout << green << getPieceStringFromEnum((*(board[i][j][1])).getType()) << reset << "|";
+	}
+
 	if (mode.compare("show 1") == 0) {
 
 	}
