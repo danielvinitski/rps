@@ -1,8 +1,9 @@
 #include "Piece.h"
+#include "Player.h"
 
 
 
-Piece::Piece(PieceType type_, bool isJoker_, int x_, int y_, int player_)
+Piece::Piece(PieceType type_, bool isJoker_, int x_, int y_, Player* player_)
 {
 	type = type_;
 	joker = isJoker_;
@@ -22,7 +23,7 @@ int Piece::getX() {
 int Piece::getY() {
 	return y;
 }
-int Piece::getPlayer() {
+Player* Piece::getPlayer() {
 	return player;
 }
 Piece::PieceType Piece::getType() {

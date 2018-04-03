@@ -1,12 +1,14 @@
+#include "Player.h"
+
 #pragma once
 class Piece
 {
 public:
 	enum PieceType { Rock = 'R', Papper = 'P', Scissors = 'S', Bomb = 'B', Flag='F' };
-	Piece(PieceType type, bool isJoker, int x, int y, int player);
+	Piece(PieceType type, bool isJoker, int x, int y, Player* player);
 	int getX();
 	int getY();
-	int getPlayer();
+	Player* getPlayer();
 	bool isJoker();
 	PieceType getType();
 	void Piece::setType(Piece::PieceType newType);
@@ -14,7 +16,8 @@ public:
 
 private:
 	PieceType type;
-	int x, y, player;
+	int x, y;
+	Player *player;
 	bool joker;
 };
 

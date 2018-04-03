@@ -37,6 +37,8 @@ Piece::PieceType getPieceTypeFromChar(char piece) {
 }
 
 bool Board::AddPiece(Piece piece) {
+	Player player = *piece.getPlayer();
+
 	if (piece.getX() > m - 1) {
 		return false;
 	}
@@ -47,39 +49,45 @@ bool Board::AddPiece(Piece piece) {
 	if (!piece.isJoker()) {
 		switch (piece.getType()) {
 		case Piece::PieceType::Rock:
-				if (maxR < ++totalR) {
-					return false;
-				}
-				break;
-		case Piece::PieceType::Papper:
-				if (maxP < ++totalP) {
-					return false;
-				}
-				break;
-		case Piece::PieceType::Scissors:
-				if (maxS < ++totalS) {
-					return false;
-				}
-				break;
-		case Piece::PieceType::Flag:
-				if (maxF < ++totalF) {
-					return false;
-				}
-				break;
-		case Piece::PieceType::Bomb:
-				if (maxB < ++totalB) {
-					return false;
-				}
-				break;
+			player.setTotalR(player.getTotalR()+1);
+			if (maxR < player.getTotalR()) {
+				return false;
 			}
+			break;
+		case Piece::PieceType::Papper:
+			player.setTotalP(player.getTotalP() + 1);
+			if (maxP < player.getTotalP()) {
+				return false;
+			}
+			break;
+		case Piece::PieceType::Scissors:
+			player.setTotalS(player.getTotalS() + 1);
+			if (maxS < player.getTotalS()) {
+				return false;
+			}
+			break;
+		case Piece::PieceType::Flag:
+			player.setTotalF(player.getTotalF() + 1);
+			if (maxF < player.getTotalF()) {
+				return false;
+			}
+			break;
+		case Piece::PieceType::Bomb:
+			player.setTotalB(player.getTotalB() + 1);
+			if (maxB < player.getTotalB()) {
+				return false;
+			}
+			break;
+		}
 	}
 	else {
-		if (maxJ < ++totalJ) {
+		player.setTotalJ(player.getTotalJ() + 1);
+		if (maxJ < player.getTotalJ()) {
 			return false;
 		}
 	}
 
-	board[piece.getY()][piece.getX()][piece.getPlayer() - 1] = &piece;
+	board[piece.getY()][piece.getX()][player.getPlayerNumber() - 1] = &piece;
 	return true;
 }
 
@@ -90,7 +98,7 @@ void Board::MovePiece(int fromX, int fromY, int toX, int toY, int player) {
 }
 void Board::MovePiece(int fromX, int fromY, int toX, int toY, int player, Piece::PieceType changeJokerType) {
 	MovePiece(fromX, fromY, toX, toY, player);
-	
+
 	Piece *pieceToMove = board[fromX][fromY][player - 1];
 	if ((*pieceToMove).isJoker()) {
 		(*pieceToMove).setType(changeJokerType);
@@ -122,12 +130,12 @@ bool Board::loadPlayer(ifstream& player)
 		}
 		x = line[2] - '0';
 		y = line[4] - '0';
-		Piece *soldier = new Piece(pt, joker, x, y, 1);
+		Piece *soldier = new Piece(pt, joker, x, y, nullptr);
 		if (!AddPiece(*soldier))
 			return false;
 	}
 	player.close();
-	totalR = 0, totalP = 0, totalS = 0, totalF = 0, totalJ = 0, totalB = 0;
+	
 	return true;
 }
 
@@ -176,6 +184,6 @@ void Board::printSquare(int i, int j, string mode) {
 Board::~Board()
 {
 	for (int i = 0; i < m; i++)
-		delete []board[i];
-	delete []board;
+		delete[]board[i];
+	delete[]board;
 }
