@@ -30,23 +30,23 @@ bool Board::AddPiece(Piece piece) {
 
 	if (!piece.isJoker()) {
 		switch (piece.getType()) {
-		case 'R':
+		case Piece::PieceType::Rock:
 			if (maxR < ++totalR) {
 				return false;
 			}
-		case 'P':
+		case Piece::PieceType::Papper:
 			if (maxP < ++totalP) {
 				return false;
 			}
-		case 'S':
+		case Piece::PieceType::Scissors:
 			if (maxS < ++totalS) {
 				return false;
 			}
-		case 'F':
+		case Piece::PieceType::Flag:
 			if (maxF < ++totalF) {
 				return false;
 			}
-		case 'B':
+		case Piece::PieceType::Bomb:
 			if (maxB < ++totalB) {
 				return false;
 			}
@@ -60,6 +60,20 @@ bool Board::AddPiece(Piece piece) {
 
 	board[m][n][piece.getPlayer() - 1] = &piece;
 	return true;
+}
+
+void Board::MovePiece(int fromX, int fromY, int toX, int toY, int player) {
+	Piece *pieceToMove = board[fromX][fromY][player - 1];
+	board[fromX][fromY][player - 1] = nullptr;
+	board[toX][toY][player - 1] = pieceToMove;
+}
+void Board::MovePiece(int fromX, int fromY, int toX, int toY, int player, Piece::PieceType changeJokerType) {
+	MovePiece(fromX, fromY, toX, toY, player);
+	
+	Piece *pieceToMove = board[fromX][fromY][player - 1];
+	if ((*pieceToMove).isJoker()) {
+		(*pieceToMove).setType(changeJokerType);
+	}
 }
 
 Piece::PieceType getPieceTypeFromChar(char piece) {

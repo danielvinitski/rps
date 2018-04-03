@@ -28,6 +28,9 @@ int Piece::getPlayer() {
 Piece::PieceType Piece::getType() {
 	return type;
 }
+void Piece::setType(Piece::PieceType newType) {
+	type = newType;
+}
 bool Piece::isJoker() {
 	return joker;
 }
