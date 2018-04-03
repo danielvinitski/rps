@@ -97,7 +97,7 @@ void Board::MovePiece(int fromX, int fromY, int toX, int toY, int player, Piece:
 	}
 }
 
-bool Board::loadPlayer(ifstream& player)
+bool Board::loadPlayer(ifstream& player, int playerNum)
 {
 	int x, y;
 	bool joker;

@@ -12,7 +12,7 @@ class Board
 
 public:
 	Board(int m, int n);
-	bool loadPlayer(ifstream& player, int playerNum);
+	bool loadPlayer(ifstream& player);
 	bool AddPiece(Piece& piece);
 	void MovePiece(int fromX, int fromY, int toX, int toY, int player);
 	void MovePiece(int fromX, int fromY, int toX, int toY, int player, Piece::PieceType changeJokerType);
