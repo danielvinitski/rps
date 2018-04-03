@@ -36,7 +36,7 @@ Piece::PieceType getPieceTypeFromChar(char piece) {
 	}
 }
 
-bool Board::AddPiece(Piece piece) {
+bool Board::AddPiece(Piece& piece) {
 	Player player = *piece.getPlayer();
 
 	if (piece.getX() > m - 1) {
@@ -87,7 +87,7 @@ bool Board::AddPiece(Piece piece) {
 		}
 	}
 
-	board[piece.getY()][piece.getX()][player.getPlayerNumber() - 1] = &piece;
+	board[piece.getX()][piece.getY()][player.getPlayerNumber() - 1] = &piece;
 	return true;
 }
 
@@ -105,12 +105,13 @@ void Board::MovePiece(int fromX, int fromY, int toX, int toY, int player, Piece:
 	}
 }
 
-bool Board::loadPlayer(ifstream& player)
+bool Board::loadPlayer(ifstream& player, int playerNum)
 {
 	int x, y;
 	bool joker;
 	bool feof = false;
 	Piece::PieceType pt;
+	Player* playerObj = new Player(playerNum);
 	char line[10];
 	while (!feof) {
 		player.getline(line, 10);
@@ -130,7 +131,7 @@ bool Board::loadPlayer(ifstream& player)
 		}
 		x = line[2] - '0';
 		y = line[4] - '0';
-		Piece *soldier = new Piece(pt, joker, x, y, nullptr);
+		Piece *soldier= new Piece(pt, joker, x, y, playerObj);
 		if (!AddPiece(*soldier))
 			return false;
 	}
@@ -145,7 +146,7 @@ bool Board::initBoard()
 	//read file of player a
 	ifstream player1File("player1.rps_board");
 	ifstream player2File("player2.rps_board");
-	return loadPlayer(player1File) && loadPlayer(player2File);
+	return loadPlayer(player1File,1) && loadPlayer(player2File,2);
 }
 
 void printLine() {
@@ -184,7 +185,7 @@ void Board::printSquare(int i, int j, string mode) {
 Board::~Board()
 {
 	for (int i = 0; i < m; i++) {
-		for (int j = 0; j < n; i++)
+		for (int j = 0; j < n; j++)
 			delete[]board[i][j];
 		delete[]board[i];
 	}

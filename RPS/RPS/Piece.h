@@ -5,7 +5,7 @@ class Piece
 {
 public:
 	enum PieceType { Rock = 'R', Papper = 'P', Scissors = 'S', Bomb = 'B', Flag='F' };
-	Piece(PieceType type, bool isJoker, int x, int y, Player* player);
+	Piece(PieceType type, bool isJoker, int x, int y, Player*& player);
 	int getX();
 	int getY();
 	Player* getPlayer();
