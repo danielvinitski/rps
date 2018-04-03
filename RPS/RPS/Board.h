@@ -12,8 +12,8 @@ class Board
 
 public:
 	Board(int m, int n);
-	bool loadPlayer(ifstream& player);
-	bool AddPiece(Piece piece);
+	bool loadPlayer(ifstream& player, int playerNum);
+	bool AddPiece(Piece& piece);
 	bool initBoard();
 	bool printBoard(std::string mode, int delay);
 	void printSquare(int i, int j, string mode);

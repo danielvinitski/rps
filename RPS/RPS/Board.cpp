@@ -36,7 +36,7 @@ Piece::PieceType getPieceTypeFromChar(char piece) {
 	}
 }
 
-bool Board::AddPiece(Piece piece) {
+bool Board::AddPiece(Piece& piece) {
 	if (piece.getX() > m - 1) {
 		return false;
 	}
@@ -79,11 +79,11 @@ bool Board::AddPiece(Piece piece) {
 		}
 	}
 
-	board[piece.getY()][piece.getX()][piece.getPlayer() - 1] = &piece;
+	board[piece.getX()][piece.getY()][piece.getPlayer() - 1] = &piece;
 	return true;
 }
 
-bool Board::loadPlayer(ifstream& player)
+bool Board::loadPlayer(ifstream& player, int playerNum)
 {
 	int x, y;
 	bool joker;
@@ -108,7 +108,7 @@ bool Board::loadPlayer(ifstream& player)
 		}
 		x = line[2] - '0';
 		y = line[4] - '0';
-		Piece *soldier = new Piece(pt, joker, x, y, 1);
+		Piece *soldier= new Piece(pt, joker, x, y, playerNum);
 		if (!AddPiece(*soldier))
 			return false;
 	}
@@ -123,7 +123,7 @@ bool Board::initBoard()
 	//read file of player a
 	ifstream player1File("player1.rps_board");
 	ifstream player2File("player2.rps_board");
-	return loadPlayer(player1File) && loadPlayer(player2File);
+	return loadPlayer(player1File,1) && loadPlayer(player2File,2);
 }
 
 void printLine() {
