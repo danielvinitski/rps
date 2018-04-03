@@ -20,6 +20,9 @@ Board::Board(int _m, int _n)
 		board[i] = new Piece**[n];
 		for (int j = 0; j < n; j++) {
 			board[i][j] = new Piece*[2];
+			for (int k = 0; k < 2; k++) {
+				board[i][j][k] = NULL;
+			}
 		}
 	}
 }
@@ -159,48 +162,63 @@ bool Board::initBoard()
 {
 	//read file of player a
 	ifstream player1File("player1.rps_board");
+	//read file of player b
 	ifstream player2File("player2.rps_board");
 	return loadPlayer(player1File,1) && loadPlayer(player2File,2);
 }
 
 void printLine() {
-	for (int i = 0; i < 10; i++) {
-		cout << "--------";
+	HANDLE hConsole;
+	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	int k;
+	for (k = 1; k < 255; k++)
+	{
+		// pick the colorattribute k you want
+		SetConsoleTextAttribute(hConsole, k);
+		cout << k << " I want to be nice today!" << endl;
 	}
-	cout << endl;
 }
 
 bool Board::printBoard(string mode, int delay)
 {
+	//printLine();
 	if (mode.compare("quiet") != 0) {
 		int i, j;
 		for (i = 0; i < 10; i++) {
-			printLine();
-			cout << "|";
+			cout << "-----------------------------------------" << endl;
+			cout << "| ";
 			for (j = 0; j < 10; j++) {
 				printSquare(i, j, mode);
 			}
+			cout << endl;
 		}
+		cout << "-----------------------------------------" << endl;
 	}
-	return 0;
+	return true;
 }
 
 void Board::printSquare(int i, int j, string mode) {
 	HANDLE hConsole;
 	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	int k;
+	char pieceType = ' ';
+	int k=15;
 	
 	if (board[i][j][0]) {
 		k = 10;
-		SetConsoleTextAttribute(hConsole, k);
-		cout << getPieceStringFromEnum((*(board[i][j][0])).getType()) << "|";
+		pieceType = getPieceStringFromEnum((*(board[i][j][0])).getType());
+		if ((*(board[i][j][0])).isJoker())
+			k += 8;
 	}
 	if (board[i][j][1]) {
-		k = 140;
-		SetConsoleTextAttribute(hConsole, k);
-		cout << green << getPieceStringFromEnum((*(board[i][j][1])).getType()) << reset << "|";
+		k = 12;
+		pieceType = getPieceStringFromEnum((*(board[i][j][1])).getType());
+		if ((*(board[i][j][1])).isJoker())
+			k += 8;
 	}
-
+	SetConsoleTextAttribute(hConsole, k);
+	cout << pieceType;
+	SetConsoleTextAttribute(hConsole, 15);
+	cout << " | ";
 	if (mode.compare("show 1") == 0) {
 
 	}
