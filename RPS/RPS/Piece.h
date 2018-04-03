@@ -6,6 +6,7 @@ public:
 	Piece(PieceType type, bool isJoker, int x, int y, int player);
 	int getX();
 	int getY();
+	int getPlayer();
 	bool isJoker();
 	PieceType getType();
 	~Piece();

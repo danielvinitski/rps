@@ -11,9 +11,13 @@ Board::Board(int m, int n)
 {
 	m = m;
 	n = n;
-	board = new Piece **[m];
-	for (int i = 0; i < m; i++)
-		board[i] = new Piece*[n];
+	board = new Piece ***[m];
+	for (int i = 0; i < m; i++) {
+		board[i] = new Piece**[n];
+		for (int j = 0; j < n; j++) {
+			board[i][j] = new Piece*[2];
+		}
+	}
 }
 
 bool Board::AddPiece(Piece piece) {
@@ -54,7 +58,7 @@ bool Board::AddPiece(Piece piece) {
 		}
 	}
 
-	board[m][n] = &piece;
+	board[m][n][piece.getPlayer() - 1] = &piece;
 	return true;
 }
 

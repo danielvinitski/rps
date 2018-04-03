@@ -22,6 +22,9 @@ int Piece::getX() {
 int Piece::getY() {
 	return y;
 }
+int Piece::getPlayer() {
+	return player;
+}
 Piece::PieceType Piece::getType() {
 	return type;
 }
