@@ -13,6 +13,8 @@ public:
 	bool isRevealed();
 	PieceType getType();
 	void Piece::setType(Piece::PieceType newType);
+	bool Piece::getRevealed();
+	void Piece::setRevealed(bool b);
 	~Piece();
 
 private:

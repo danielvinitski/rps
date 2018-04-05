@@ -21,7 +21,7 @@ Board::Board(int _m, int _n)
 		for (int j = 0; j < n; j++) {
 			board[i][j] = new Piece*[2];
 			for (int k = 0; k < 2; k++) {
-				board[i][j][k] = NULL;
+				board[i][j][k] = nullptr;
 			}
 		}
 	}
@@ -66,7 +66,7 @@ bool Board::AddPiece(Piece& piece) {
 	if (!piece.isJoker()) {
 		switch (piece.getType()) {
 		case Piece::PieceType::Rock:
-			player.setTotalR(player.getTotalR()+1);
+			player.setTotalR(player.getTotalR() + 1);
 			if (maxR < player.getTotalR()) {
 				return false;
 			}
@@ -148,13 +148,13 @@ bool Board::loadPlayer(ifstream& player, int playerNum)
 		}
 		x = line[2] - '0';
 		y = line[4] - '0';
-		Piece *soldier= new Piece(pt, joker, x, y, playerObj,false);
+		Piece *soldier = new Piece(pt, joker, x, y, playerObj, false);
 		if (!AddPiece(*soldier))
 			return false;
 	}
 	player.close();
-	
-	return true;
+
+	return playerObj->getTotalF() == maxF;
 }
 
 
@@ -164,7 +164,7 @@ bool Board::initBoard()
 	ifstream player1File("player1.rps_board");
 	//read file of player b
 	ifstream player2File("player2.rps_board");
-	return loadPlayer(player1File,1) && loadPlayer(player2File,2);
+	return loadPlayer(player1File, 1) && loadPlayer(player2File, 2);
 }
 
 void printLine() {
@@ -201,8 +201,8 @@ void Board::printSquare(int i, int j, string mode) {
 	HANDLE hConsole;
 	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	char pieceType = ' ';
-	int k=15;
-	
+	int k = 15;
+
 	if (board[i][j][0]) {
 		k = 10;
 		if ((mode.compare("show 2") == 0 || mode.compare("show-only-known-info") == 0) && !((*(board[i][j][0])).isRevealed()))
@@ -237,4 +237,98 @@ Board::~Board()
 		delete[]board[i];
 	}
 	delete[]board;
+}
+
+Player* Board::scanBoard() {
+	Player* winner = nullptr;
+	for (int i = 0; i < m; i++)
+		for (int j = 0; j < n; j++)
+			if (board[i][j][0] != nullptr && board[i][j][1] != nullptr) {
+				combat(i, j);
+				winner = checkForWinner(board[i][j][0]->getPlayer(), board[i][j][1]->getPlayer());
+			}
+
+	return winner;
+}
+
+void Board::combat(int x, int y) {
+	Piece* piece1 = board[x][y][0];
+	Piece* piece2 = board[x][y][1];
+	Player* player1 = piece1->getPlayer();
+	Player* player2 = piece2->getPlayer();
+	Piece::PieceType t1 = piece1->getType();
+	Piece::PieceType t2 = piece2->getType();
+
+	//reveal both
+	piece1->setRevealed(true);
+	piece2->setRevealed(true);
+
+	//combat
+	if ((t1 == Piece::PieceType::Bomb || t2 == Piece::PieceType::Bomb) || t1 == t2) {
+		removePiece(x, y, piece1);
+		removePiece(x, y, piece2);
+	}
+
+	if (t1 == Piece::PieceType::Flag && t2 != Piece::PieceType::Flag) {
+		removePiece(x, y, piece1);
+	}
+	if (t2 == Piece::PieceType::Flag && t1 != Piece::PieceType::Flag) {
+		removePiece(x, y, piece2);
+	}
+
+	if ((t1 == Piece::PieceType::Rock && t2 == Piece::PieceType::Scissors) ||
+		(t1 == Piece::PieceType::Scissors && t2 == Piece::PieceType::Papper) ||
+		(t1 == Piece::PieceType::Papper && t2 == Piece::PieceType::Rock)) {
+		removePiece(x, y, piece2);
+	}
+	if ((t2 == Piece::PieceType::Rock && t1 == Piece::PieceType::Scissors) ||
+		(t2 == Piece::PieceType::Scissors && t1 == Piece::PieceType::Papper) ||
+		(t2 == Piece::PieceType::Papper && t1 == Piece::PieceType::Rock)) {
+		removePiece(x, y, piece1);
+	}
+}
+
+void Board::removePiece(int x, int y, Piece* piece) {
+	Player* player = piece->getPlayer();
+	int playerNum = player->getPlayerNumber() - 1;
+
+	//remove piece
+	board[x][y][playerNum] = nullptr;
+
+	//update total
+	if (piece->isJoker()) {
+		player->setTotalJ(player->getTotalJ() - 1);
+	}
+	else {
+
+		switch (piece->getType()) {
+		case Piece::PieceType::Bomb:
+			player->setTotalB(player->getTotalB() - 1);
+			break;
+		case Piece::PieceType::Flag:
+			player->setTotalF(player->getTotalF() - 1);
+			break;
+		case Piece::PieceType::Rock:
+			player->setTotalR(player->getTotalR() - 1);
+			break;
+		case Piece::PieceType::Scissors:
+			player->setTotalS(player->getTotalS() - 1);
+			break;
+		case Piece::PieceType::Papper:
+			player->setTotalP(player->getTotalP() - 1);
+			break;
+		}
+	}
+}
+
+Player* Board::checkForWinner(Player* player1, Player* player2) {
+	//flags are killed
+	if (player1->getTotalF() == 0) return player2;
+	if (player2->getTotalF() == 0) return player1;
+
+	//all other soldiers are killed
+	if ((player1->getTotalB() + player1->getTotalR() +
+		player1->getTotalP() + player1->getTotalS() + player1->getTotalJ()) == 0) return player2;
+	if ((player2->getTotalB() + player2->getTotalR() +
+		player2->getTotalP() + player2->getTotalS() + player2->getTotalJ()) == 0) return player1;
 }

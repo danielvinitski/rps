@@ -33,6 +33,12 @@ Piece::PieceType Piece::getType() {
 void Piece::setType(Piece::PieceType newType) {
 	type = newType;
 }
+bool Piece::getRevealed() {
+	return revealed;
+}
+void Piece::setRevealed(bool b) {
+	revealed = b;
+}
 bool Piece::isJoker() {
 	return joker;
 }
