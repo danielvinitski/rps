@@ -56,10 +56,8 @@ char getPieceStringFromEnum(Piece::PieceType pieceType) {
 bool Board::AddPiece(Piece& piece) {
 	Player* player = piece.getPlayer();
 
-	if (piece.getX() > m - 1) {
-		return false;
-	}
-	if (piece.getY() > n - 1) {
+	if (piece.getX() > m - 1 || piece.getY() > n - 1) {
+		message = "X coordinate and/or Y coordinate of one or more PIECE is not in range";
 		return false;
 	}
 
@@ -68,30 +66,35 @@ bool Board::AddPiece(Piece& piece) {
 		case Piece::PieceType::Rock:
 			player->setTotalR(player->getTotalR() + 1);
 			if (maxR < player->getTotalR()) {
+				message = "A PIECE type appears in file more than its number";
 				return false;
 			}
 			break;
 		case Piece::PieceType::Papper:
 			player->setTotalP(player->getTotalP() + 1);
 			if (maxP < player->getTotalP()) {
+				message = "A PIECE type appears in file more than its number";
 				return false;
 			}
 			break;
 		case Piece::PieceType::Scissors:
 			player->setTotalS(player->getTotalS() + 1);
 			if (maxS < player->getTotalS()) {
+				message = "A PIECE type appears in file more than its number";
 				return false;
 			}
 			break;
 		case Piece::PieceType::Flag:
 			player->setTotalF(player->getTotalF() + 1);
 			if (maxF < player->getTotalF()) {
+				message = "A PIECE type appears in file more than its number";
 				return false;
 			}
 			break;
 		case Piece::PieceType::Bomb:
 			player->setTotalB(player->getTotalB() + 1);
 			if (maxB < player->getTotalB()) {
+				message = "A PIECE type appears in file more than its number";
 				return false;
 			}
 			break;
@@ -100,26 +103,46 @@ bool Board::AddPiece(Piece& piece) {
 	else {
 		player->setTotalJ(player->getTotalJ() + 1);
 		if (maxJ < player->getTotalJ()) {
+			message = "A PIECE type appears in file more than its number";
 			return false;
 		}
 	}
 
+	if (board[piece.getX()][piece.getY()][player->getPlayerNumber() - 1]) {
+		message = "Two or more PIECEs (of same player) are positioned on same location";
+		return false;
+	}
 	board[piece.getX()][piece.getY()][player->getPlayerNumber() - 1] = &piece;
+
 	return true;
 }
 
-void Board::MovePiece(int fromX, int fromY, int toX, int toY, int player) {
+bool Board::MovePiece(int fromX, int fromY, int toX, int toY, int player) {
+	if (toX > m - 1 || toY > n - 1 || fromX > m - 1 || fromY > n - 1) {
+		message = "X coordinate and/or Y coordinate of one or more PIECE is not in range";
+		return false;
+	}
+	if (board[toX][toY][player - 1]) {
+		message = "Two or more PIECEs (of same player) are positioned on same location";
+		return false;
+	}
+
 	Piece *pieceToMove = board[fromX][fromY][player - 1];
 	board[fromX][fromY][player - 1] = nullptr;
 	board[toX][toY][player - 1] = pieceToMove;
 }
-void Board::MovePiece(int fromX, int fromY, int toX, int toY, int player, Piece::PieceType changeJokerType) {
-	MovePiece(fromX, fromY, toX, toY, player);
+bool Board::MovePiece(int fromX, int fromY, int toX, int toY, int player, Piece::PieceType changeJokerType) {
+	if (MovePiece(fromX, fromY, toX, toY, player)) {
 
-	Piece *pieceToMove = board[fromX][fromY][player - 1];
-	if ((*pieceToMove).isJoker()) {
-		(*pieceToMove).setType(changeJokerType);
+		Piece *pieceToMove = board[fromX][fromY][player - 1];
+		if ((*pieceToMove).isJoker()) {
+			(*pieceToMove).setType(changeJokerType);
+		}
+		else {
+			message = "Joker position doesn’t have a Joker owned by this player";
+		}
 	}
+	else return false;
 }
 
 bool Board::loadPlayer(ifstream& player, int playerNum)
@@ -136,6 +159,7 @@ bool Board::loadPlayer(ifstream& player, int playerNum)
 			feof = true;
 		}
 		if (!(line[0] == 'R' || line[0] == 'S' || line[0] == 'P' || line[0] == 'J' || line[0] == 'B' || line[0] == 'F')) { //check the first letter of the input
+			message = "Bad format";
 			return false;
 		}
 		if (line[0] == 'J') {
@@ -154,7 +178,12 @@ bool Board::loadPlayer(ifstream& player, int playerNum)
 	}
 	player.close();
 
-	return playerObj->getTotalF() == maxF;
+	if (playerObj->getTotalF() != maxF) {
+		message = "Missing Flags - Flags are not positioned according to their number";
+		return false;
+	}
+
+	return true;
 }
 
 
@@ -240,18 +269,17 @@ Board::~Board()
 	delete[]board;
 }
 
-Player* Board::scanBoard() {
-	Player* winner = nullptr;
+bool Board::scanBoard() { //return true if game isn't over
 	for (int i = 0; i < m; i++)
 		for (int j = 0; j < n; j++)
-			if (board[i][j][0] != NULL && board[i][j][1] != NULL) {
+			if (board[i][j][0] != nullptr && board[i][j][1] != nullptr) {
 				Player* player1 = board[i][j][0]->getPlayer();
 				Player* player2 = board[i][j][1]->getPlayer();
 				combat(i, j);
 				winner = checkForWinner(player1, player2);
 			}
 
-	return winner;
+	return winner == nullptr && message.size() == 0;
 }
 
 void Board::combat(int x, int y) {
@@ -325,13 +353,28 @@ void Board::removePiece(int x, int y, Piece* piece) {
 }
 
 Player* Board::checkForWinner(Player* player1, Player* player2) {
+	bool player1Won = false, player2Won = false;
+
 	//flags are killed
-	if (player1->getTotalF() == 0) return player2;
-	if (player2->getTotalF() == 0) return player1;
+	if (player1->getTotalF() == 0) player2Won = true;
+	if (player2->getTotalF() == 0)  player1Won = true;
 
 	//all other soldiers are killed
 	if ((player1->getTotalB() + player1->getTotalR() +
-		player1->getTotalP() + player1->getTotalS() + player1->getTotalJ()) == 0) return player2;
+		player1->getTotalP() + player1->getTotalS() + player1->getTotalJ()) == 0) player2Won = true;
 	if ((player2->getTotalB() + player2->getTotalR() +
-		player2->getTotalP() + player2->getTotalS() + player2->getTotalJ()) == 0) return player1;
+		player2->getTotalP() + player2->getTotalS() + player2->getTotalJ()) == 0) player1Won = true;
+
+	//make sure not a tie
+	if (player1Won && !player2Won) return player1;
+	else if (!player1Won && player2Won) return player2;
+	else return nullptr;
+}
+
+string Board::getMessage() {
+	return message;
+}
+
+Player* Board::getWinner() {
+	return winner;
 }

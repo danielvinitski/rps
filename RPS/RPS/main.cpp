@@ -7,17 +7,22 @@ using namespace std;
 
 int main() {
 	Player* winner = nullptr;
-	Board board = Board(10,10);
+	Board board = Board(10, 10);
 	if (!board.initBoard())
-		cout << "problem with the board init" << endl;
+		cout << board.getMessage() << endl;
 	//board.printBoard("show 1", 50);
-	
-	winner = board.scanBoard();
+
 	board.printBoard("show 1", 50);
-	while ((winner != nullptr)) {
-		
+	while (board.scanBoard()) {
+
 	}
-	cout << "winner is player " << winner->getPlayerNumber() << endl;
+	winner = board.getWinner();
+	if (winner) {
+		cout << "winner is player " << winner->getPlayerNumber() << endl;
+	}
+	else {
+		cout << board.getMessage() << endl;
+	}
 }
 
 
