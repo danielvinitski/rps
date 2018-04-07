@@ -8,7 +8,7 @@ using namespace std;
 
 int getFileLenght(string fileName) {
 	ifstream file(fileName);
-	
+
 	int fileLen = 0;
 	char line[20];
 	bool feof = false;
@@ -82,19 +82,19 @@ int main() {
 	if (!board.initBoard())
 		cout << board.getMessage() << endl;
 	//board.printBoard("show 1", 50);
-	
-	winner = board.scanBoard();
+
+	board.scanBoard();
 	board.printBoard("show-all", 50);
 	int file1Len = getFileLenght("player1.rps_moves");
 	int file2Len = getFileLenght("player2.rps_moves");
 	Move** moveList = initMoves(file1Len, file2Len);
-	if (moveList ==nullptr)
+	if (moveList == nullptr)
 		cout << "problem with the moveList init" << endl;
-	bool eol = false;
+
 	int playedMoves = 0;
-	while (winner != nullptr || (playedMoves<file1Len + file2Len)) {
+
+	while (board.scanBoard() && (playedMoves < file1Len + file2Len)) {
 		board.MovePiece(moveList[playedMoves]);
-		winner = board.scanBoard();
 		board.printBoard("show-all", 50);
 		playedMoves += 1;
 	}

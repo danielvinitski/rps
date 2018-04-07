@@ -118,39 +118,29 @@ bool Board::AddPiece(Piece& piece) {
 	return true;
 }
 
-bool Board::MovePiece(int fromX, int fromY, int toX, int toY, int player) {
-	if (toX > m - 1 || toY > n - 1 || fromX > m - 1 || fromY > n - 1) {
+
+bool Board::MovePiece(Move* move) {
+	if (move->getTargetX() > m - 1 || move->getTargetY() > n - 1 || move->getCurrentX() > m - 1 || move->getCurrentY() > n - 1) {
 		message = "X coordinate and/or Y coordinate of one or more PIECE is not in range";
 		return false;
 	}
-	if (board[toX][toY][player - 1]) {
+	if (board[move->getTargetX()][move->getTargetY()][move->getplayer()]) {
 		message = "Two or more PIECEs (of same player) are positioned on same location";
 		return false;
 	}
 
-	Piece *pieceToMove = board[fromX][fromY][player - 1];
-	board[fromX][fromY][player - 1] = nullptr;
-	board[toX][toY][player - 1] = pieceToMove;
-}
-bool Board::MovePiece(int fromX, int fromY, int toX, int toY, int player, Piece::PieceType changeJokerType) {
-	if (MovePiece(fromX, fromY, toX, toY, player)) {
-
-		Piece *pieceToMove = board[fromX][fromY][player - 1];
-		if ((*pieceToMove).isJoker()) {
-			(*pieceToMove).setType(changeJokerType);
-		}
-		else {
-			message = "Joker position doesn’t have a Joker owned by this player";
-		}
-	}
-	else return false;
-}
-void Board::MovePiece(Move* move) {
 	Piece *pieceToMove = board[move->getCurrentX()][move->getCurrentY()][move->getplayer()];
 	board[move->getCurrentX()][move->getCurrentY()][move->getplayer()] = nullptr;
 	board[move->getTargetX()][move->getTargetY()][move->getplayer()] = pieceToMove;
+
 	if (move->getJoker()) {
-		(board[move->getJokerX()][move->getJokerY()][move->getplayer()])->setType(getPieceTypeFromChar(move->getNewPieceType()));
+		if ((*pieceToMove).isJoker()) {
+			(board[move->getJokerX()][move->getJokerY()][move->getplayer()])->setType(getPieceTypeFromChar(move->getNewPieceType()));
+		}
+		else {
+			message = "Joker position doesn’t have a Joker owned by this player";
+			return false;
+		}
 	}
 }
 
