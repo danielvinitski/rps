@@ -54,7 +54,7 @@ char getPieceStringFromEnum(Piece::PieceType pieceType) {
 }
 
 bool Board::AddPiece(Piece& piece) {
-	Player player = *(piece.getPlayer());
+	Player* player = piece.getPlayer();
 
 	if (piece.getX() > m - 1) {
 		return false;
@@ -66,45 +66,45 @@ bool Board::AddPiece(Piece& piece) {
 	if (!piece.isJoker()) {
 		switch (piece.getType()) {
 		case Piece::PieceType::Rock:
-			player.setTotalR(player.getTotalR() + 1);
-			if (maxR < player.getTotalR()) {
+			player->setTotalR(player->getTotalR() + 1);
+			if (maxR < player->getTotalR()) {
 				return false;
 			}
 			break;
 		case Piece::PieceType::Papper:
-			player.setTotalP(player.getTotalP() + 1);
-			if (maxP < player.getTotalP()) {
+			player->setTotalP(player->getTotalP() + 1);
+			if (maxP < player->getTotalP()) {
 				return false;
 			}
 			break;
 		case Piece::PieceType::Scissors:
-			player.setTotalS(player.getTotalS() + 1);
-			if (maxS < player.getTotalS()) {
+			player->setTotalS(player->getTotalS() + 1);
+			if (maxS < player->getTotalS()) {
 				return false;
 			}
 			break;
 		case Piece::PieceType::Flag:
-			player.setTotalF(player.getTotalF() + 1);
-			if (maxF < player.getTotalF()) {
+			player->setTotalF(player->getTotalF() + 1);
+			if (maxF < player->getTotalF()) {
 				return false;
 			}
 			break;
 		case Piece::PieceType::Bomb:
-			player.setTotalB(player.getTotalB() + 1);
-			if (maxB < player.getTotalB()) {
+			player->setTotalB(player->getTotalB() + 1);
+			if (maxB < player->getTotalB()) {
 				return false;
 			}
 			break;
 		}
 	}
 	else {
-		player.setTotalJ(player.getTotalJ() + 1);
-		if (maxJ < player.getTotalJ()) {
+		player->setTotalJ(player->getTotalJ() + 1);
+		if (maxJ < player->getTotalJ()) {
 			return false;
 		}
 	}
 
-	board[piece.getX()][piece.getY()][player.getPlayerNumber() - 1] = &piece;
+	board[piece.getX()][piece.getY()][player->getPlayerNumber() - 1] = &piece;
 	return true;
 }
 
@@ -244,9 +244,11 @@ Player* Board::scanBoard() {
 	Player* winner = nullptr;
 	for (int i = 0; i < m; i++)
 		for (int j = 0; j < n; j++)
-			if (board[i][j][0] != nullptr && board[i][j][1] != nullptr) {
+			if (board[i][j][0] != NULL && board[i][j][1] != NULL) {
+				Player* player1 = board[i][j][0]->getPlayer();
+				Player* player2 = board[i][j][1]->getPlayer();
 				combat(i, j);
-				winner = checkForWinner(board[i][j][0]->getPlayer(), board[i][j][1]->getPlayer());
+				winner = checkForWinner(player1, player2);
 			}
 
 	return winner;
