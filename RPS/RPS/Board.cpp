@@ -54,7 +54,7 @@ char getPieceStringFromEnum(Piece::PieceType pieceType) {
 }
 
 bool Board::AddPiece(Piece& piece) {
-	Player player = *piece.getPlayer();
+	Player player = *(piece.getPlayer());
 
 	if (piece.getX() > m - 1) {
 		return false;
@@ -194,6 +194,7 @@ bool Board::printBoard(string mode, int delay)
 		}
 		cout << "-----------------------------------------" << endl;
 	}
+	Sleep(delay);
 	return true;
 }
 

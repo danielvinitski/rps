@@ -3,7 +3,7 @@
 
 
 
-Piece::Piece(PieceType type_, bool isJoker_, int x_, int y_, Player*& player_, bool isRevealed_)
+Piece::Piece(PieceType type_, bool isJoker_, int x_, int y_, Player* player_, bool isRevealed_)
 {
 	type = type_;
 	joker = isJoker_;

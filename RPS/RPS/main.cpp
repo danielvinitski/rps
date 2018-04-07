@@ -10,13 +10,14 @@ int main() {
 	Board board = Board(10,10);
 	if (!board.initBoard())
 		cout << "problem with the board init" << endl;
-	board.printBoard("show 1", 50);
+	//board.printBoard("show 1", 50);
 	
 	winner = board.scanBoard();
 	board.printBoard("show 1", 50);
-	if (winner != nullptr) {
-		cout << "winner is player " << winner->getPlayerNumber() << endl;
+	while ((winner != nullptr)) {
+		
 	}
+	cout << "winner is player " << winner->getPlayerNumber() << endl;
 }
 
 
