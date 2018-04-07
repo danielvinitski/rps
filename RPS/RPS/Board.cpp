@@ -1,5 +1,6 @@
 #include "Board.h"
 #include "Piece.h"
+#include "Move.h"
 #include <string>
 #include<iostream>
 #include<fstream>
@@ -121,6 +122,15 @@ void Board::MovePiece(int fromX, int fromY, int toX, int toY, int player, Piece:
 		(*pieceToMove).setType(changeJokerType);
 	}
 }
+void Board::MovePiece(Move* move) {
+	Piece *pieceToMove = board[move->getCurrentX()][move->getCurrentY()][move->getplayer()];
+	board[move->getCurrentX()][move->getCurrentY()][move->getplayer()] = nullptr;
+	board[move->getTargetX()][move->getTargetY()][move->getplayer()] = pieceToMove;
+	if (move->getJoker()) {
+		(board[move->getJokerX()][move->getJokerY()][move->getplayer()])->setType(getPieceTypeFromChar(move->getNewPieceType()));
+	}
+}
+
 
 bool Board::loadPlayer(ifstream& player, int playerNum)
 {

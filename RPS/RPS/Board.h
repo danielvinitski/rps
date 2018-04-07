@@ -1,5 +1,6 @@
 #include "Piece.h"
 #include <string>
+#include "Move.h"
 using namespace std;
 
 #pragma once
@@ -16,6 +17,7 @@ public:
 	Board(int m, int n);
 	bool loadPlayer(ifstream& player, int playerNum);
 	bool AddPiece(Piece& piece);
+	void MovePiece(Move* move);
 	void MovePiece(int fromX, int fromY, int toX, int toY, int player);
 	void MovePiece(int fromX, int fromY, int toX, int toY, int player, Piece::PieceType changeJokerType);
 	bool initBoard();
