@@ -7,11 +7,13 @@ using namespace std;
 class Board
 {
 	int m, n;
-	const int maxR = 2, maxP = 5, maxS = 1, maxF = 1, maxJ = 2, maxB=2;
+	const int maxR = 2, maxP = 5, maxS = 1, maxF = 1, maxJ = 2, maxB = 2;
 	Piece ****board;
 	void combat(int x, int y);
 	void removePiece(int x, int y, Piece* piece);
 	Player* checkForWinner(Player* player1, Player* player2);
+	string message = "";
+	Player* winner;
 
 public:
 	Board(int m, int n);
@@ -23,7 +25,9 @@ public:
 	bool initBoard();
 	bool printBoard(std::string mode, int delay);
 	void printSquare(int i, int j, string mode);
-	Player* scanBoard();
+	string getMessage();
+	Player* getWinner();
+	bool scanBoard();
 	~Board();
 };
 
