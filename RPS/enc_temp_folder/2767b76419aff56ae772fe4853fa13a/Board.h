@@ -13,7 +13,7 @@ class Board
 	void removePiece(int x, int y, Piece* piece);
 	int checkForWinner(Player* player1, Player* player2);
 	string message = "";
-	int winner=-1;
+	int winner=NULL;
 
 public:
 	Board(int m, int n);

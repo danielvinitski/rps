@@ -124,42 +124,52 @@ bool Board::MovePiece(Move* move) {
 		message = "X coordinate and/or Y coordinate of one or more PIECE is not in range";
 		return false;
 	}
-	if (board[move->getTargetX()][move->getTargetY()][move->getplayer()]) {
+	if (board[move->getTargetY()][move->getTargetX()][move->getplayer()]) {
 		message = "Two or more PIECEs (of same player) are positioned on same location";
 		return false;
 	}
 
-	Piece *pieceToMove = board[move->getCurrentX()][move->getCurrentY()][move->getplayer()];
-	board[move->getCurrentX()][move->getCurrentY()][move->getplayer()] = nullptr;
-	board[move->getTargetX()][move->getTargetY()][move->getplayer()] = pieceToMove;
+	Piece *pieceToMove = board[move->getCurrentY()][move->getCurrentX()][move->getplayer()];
+	if (pieceToMove == nullptr) {
+		message = "moving not exsisting PIECE";
+		return false;
+	}
+	board[move->getCurrentY()][move->getCurrentX()][move->getplayer()] = nullptr;
+	board[move->getTargetY()][move->getTargetX()][move->getplayer()] = pieceToMove;
 
 	if (move->getJoker()) {
-		if ((*pieceToMove).isJoker()) {
-			(board[move->getJokerX()][move->getJokerY()][move->getplayer()])->setType(getPieceTypeFromChar(move->getNewPieceType()));
+		Piece *jockerToChange = board[move->getJokerX()][move->getJokerY()][move->getplayer()];
+		if (jockerToChange != nullptr && (*jockerToChange).isJoker()) {
+			(board[move->getJokerY()][move->getJokerX()][move->getplayer()])->setType(getPieceTypeFromChar(move->getNewPieceType()));
 		}
 		else {
 			message = "Joker position doesn’t have a Joker owned by this player";
 			return false;
 		}
 	}
+	return true;
 }
 
 
-bool Board::loadPlayer(ifstream& player, int playerNum)
-{
+bool Board::loadPlayer(ifstream& player, int playerNum, int& lineNum)
+{	
 	int x, y;
 	bool joker;
 	bool feof = false;
 	Piece::PieceType pt;
 	Player* playerObj = new Player(playerNum);
+	int lineCounter = 0;
 	char line[10];
 	while (!feof) {
 		player.getline(line, 10);
+		lineCounter += 1;
 		if (player.eof()) {
 			feof = true;
 		}
 		if (!(line[0] == 'R' || line[0] == 'S' || line[0] == 'P' || line[0] == 'J' || line[0] == 'B' || line[0] == 'F')) { //check the first letter of the input
-			message = "Bad format";
+			cout << "Bad format in line " << to_string(lineCounter) << endl;
+			message = "Bad format in player " + to_string(playerNum) + " init file";
+			lineNum = lineCounter;
 			return false;
 		}
 		if (line[0] == 'J') {
@@ -170,10 +180,18 @@ bool Board::loadPlayer(ifstream& player, int playerNum)
 			joker = false;
 			pt = getPieceTypeFromChar(line[0]);
 		}
-		x = line[2] - '0';
-		y = line[4] - '0';
+		if (line[2] <= '9' && line[2] >= '0' && line[4] <= '9' && line[4] >= '0') {
+			x = line[2] - '0';
+			y = line[4] - '0';
+		}else{
+			cout << "Bad format in line " << to_string(lineCounter) << endl;
+			message = "Bad format in player " + to_string(playerNum) + " init file";
+			lineNum = lineCounter;
+			return false;
+		}
 		Piece *soldier = new Piece(pt, joker, x, y, playerObj, false);
 		if (!AddPiece(*soldier))
+			lineNum = lineCounter;
 			return false;
 	}
 	player.close();
@@ -182,18 +200,36 @@ bool Board::loadPlayer(ifstream& player, int playerNum)
 		message = "Missing Flags - Flags are not positioned according to their number";
 		return false;
 	}
-
 	return true;
 }
 
 
 bool Board::initBoard()
 {
+	int lineNumber1;
+	int lineNumber2;
+	bool initfile1, initfile2;
 	//read file of player a
 	ifstream player1File("player1.rps_board");
 	//read file of player b
 	ifstream player2File("player2.rps_board");
-	return loadPlayer(player1File, 1) && loadPlayer(player2File, 2);
+	initfile1 = loadPlayer(player1File, 1, lineNumber1);
+	initfile2 = loadPlayer(player2File, 2, lineNumber2);
+	if (!(initfile1 || initfile2)) {
+		winner = 0;
+		message = "Bad Positioning input file for both players - player 1: line " + to_string(lineNumber1) + ", player 2: line " + to_string(lineNumber2);
+		return false;
+	}
+	if (!initfile1) {
+		winner = 2;
+		message = "Bad Positioning input file for player 1 - line " + to_string(lineNumber1);
+		return false;
+	}
+	if (!initfile2) {
+		winner = 1;
+		message = "Bad Positioning input file for player 2 - line " + to_string(lineNumber2);
+		return false;
+	}
 }
 
 void printLine() {
@@ -208,7 +244,7 @@ void printLine() {
 	}
 }
 
-bool Board::printBoard(string mode, int delay)
+void Board::printBoard(string mode, int delay)
 {
 	//printLine();
 	if (mode.compare("quiet") != 0) {
@@ -224,7 +260,6 @@ bool Board::printBoard(string mode, int delay)
 		cout << "-----------------------------------------" << endl;
 	}
 	Sleep(delay);
-	return true;
 }
 
 void Board::printSquare(int i, int j, string mode) {
@@ -279,7 +314,7 @@ bool Board::scanBoard() { //return true if game isn't over
 				winner = checkForWinner(player1, player2);
 			}
 
-	return winner == nullptr && message.size() == 0;
+	return winner == 0 && message.size() == 0;
 }
 
 void Board::combat(int x, int y) {
@@ -352,29 +387,41 @@ void Board::removePiece(int x, int y, Piece* piece) {
 	}
 }
 
-Player* Board::checkForWinner(Player* player1, Player* player2) {
+int Board::checkForWinner(Player* player1, Player* player2) {
 	bool player1Won = false, player2Won = false;
 
 	//flags are killed
-	if (player1->getTotalF() == 0) player2Won = true;
-	if (player2->getTotalF() == 0)  player1Won = true;
+	if (player1->getTotalF() == 0) {
+		message = "All flags of the opponent are captured";
+		player2Won = true; 
+	}
+	if (player2->getTotalF() == 0) { 
+		message = "All flags of the opponent are captured";
+		player1Won = true;
+	}
 
 	//all other soldiers are killed
 	if ((player1->getTotalB() + player1->getTotalR() +
-		player1->getTotalP() + player1->getTotalS() + player1->getTotalJ()) == 0) player2Won = true;
+		player1->getTotalP() + player1->getTotalS() + player1->getTotalJ()) == 0) {
+		message = "All moving PIECEs of the opponent are eaten";
+		player2Won = true;
+	}
 	if ((player2->getTotalB() + player2->getTotalR() +
-		player2->getTotalP() + player2->getTotalS() + player2->getTotalJ()) == 0) player1Won = true;
+		player2->getTotalP() + player2->getTotalS() + player2->getTotalJ()) == 0) {
+		message = "All moving PIECEs of the opponent are eaten";
+		player1Won = true;
+	}
 
 	//make sure not a tie
-	if (player1Won && !player2Won) return player1;
-	else if (!player1Won && player2Won) return player2;
-	else return nullptr;
+	if (player1Won && !player2Won) return 1;
+	else if (!player1Won && player2Won) return 2;
+	else return 0;
 }
 
 string Board::getMessage() {
 	return message;
 }
 
-Player* Board::getWinner() {
+int Board::getWinner() {
 	return winner;
 }
