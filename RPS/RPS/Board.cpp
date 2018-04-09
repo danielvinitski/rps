@@ -109,11 +109,11 @@ bool Board::AddPiece(Piece& piece) {
 		}
 	}
 
-	if (board[piece.getX()][piece.getY()][player->getPlayerNumber() - 1]) {
+	if (board[piece.getX()-1][piece.getY()-1][player->getPlayerNumber() - 1]) {
 		message = "Two or more PIECEs (of same player) are positioned on same location";
 		return false;
 	}
-	board[piece.getX()][piece.getY()][player->getPlayerNumber() - 1] = &piece;
+	board[piece.getY()-1][piece.getX()-1][player->getPlayerNumber() - 1] = &piece;
 	return true;
 }
 
@@ -139,7 +139,7 @@ bool Board::MovePiece(Move* move) {
 	if (move->getJoker()) {
 		Piece *jockerToChange = board[move->getJokerX()][move->getJokerY()][move->getplayer()];
 		if (jockerToChange != nullptr && (*jockerToChange).isJoker()) {
-			(board[move->getJokerX()][move->getJokerY()][move->getplayer()])->setType(getPieceTypeFromChar(move->getNewPieceType()));
+			(board[move->getJokerY()][move->getJokerX()][move->getplayer()])->setType(getPieceTypeFromChar(move->getNewPieceType()));
 		}
 		else {
 			message = "Joker position doesn’t have a Joker owned by this player";
@@ -250,15 +250,26 @@ void Board::printBoard(string mode, int delay)
 	//printLine();
 	if (mode.compare("quiet") != 0) {
 		int i, j;
+		cout << "    ----------------------------------------" << endl << "    | ";
+		for (i = 1; i < 11; i++) {
+			if(i!=10)
+				cout << i <<  " | ";
+			else
+				cout << i << "|";
+		}
+		cout << endl;
 		for (i = 0; i < 10; i++) {
-			cout << "-----------------------------------------" << endl;
-			cout << "| ";
+			cout << "--------------------------------------------" << endl;
+			if(i != 9)
+				cout << "| " << i+1 << " | ";
+			else
+				cout << "|" << i + 1 << " | ";
 			for (j = 0; j < 10; j++) {
 				printSquare(i, j, mode);
 			}
 			cout << endl;
 		}
-			cout << "-----------------------------------------" << endl;
+			cout << "--------------------------------------------" << endl;
 		
 	}
 	Sleep(delay);
@@ -297,7 +308,7 @@ void Board::printSquare(int i, int j, string mode) {
 }
 
 void Board::printBoard(ofstream& outfile)
-{
+{	
 	//printLine();
 	int i, j;
 	for (i = 0; i < 10; i++) {

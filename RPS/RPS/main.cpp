@@ -125,8 +125,8 @@ int main() {
 				}
 				if (move1 != nullptr) {
 					if (!board.MovePiece(move1)) break;
-					if (!board.scanBoard()) break;
 					board.printBoard(mode, delay);
+					if (!board.scanBoard()) break;
 				}
 			}
 			if (!finishMove2) {
@@ -144,8 +144,8 @@ int main() {
 				}
 				if (move2 != nullptr) {
 					if (!board.MovePiece(move2)) break;
-					if (!board.scanBoard()) break;
 					board.printBoard(mode, delay);
+					if (!board.scanBoard()) break;
 				}
 			}
 			if (move1 == nullptr && move2 == nullptr) {
@@ -164,6 +164,8 @@ int main() {
 				break;
 			}
 		}
+		player1MoveFile.close();
+		player2MoveFile.close();
 	}
 	winner = board.getWinner();
 	string message = board.getMessage();
@@ -175,5 +177,3 @@ int main() {
 	}
 	generateOutput(board);
 }
-
-
