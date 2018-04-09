@@ -114,7 +114,6 @@ bool Board::AddPiece(Piece& piece) {
 		return false;
 	}
 	board[piece.getX()][piece.getY()][player->getPlayerNumber() - 1] = &piece;
-
 	return true;
 }
 
@@ -140,7 +139,7 @@ bool Board::MovePiece(Move* move) {
 	if (move->getJoker()) {
 		Piece *jockerToChange = board[move->getJokerX()][move->getJokerY()][move->getplayer()];
 		if (jockerToChange != nullptr && (*jockerToChange).isJoker()) {
-			(board[move->getJokerY()][move->getJokerX()][move->getplayer()])->setType(getPieceTypeFromChar(move->getNewPieceType()));
+			(board[move->getJokerX()][move->getJokerY()][move->getplayer()])->setType(getPieceTypeFromChar(move->getNewPieceType()));
 		}
 		else {
 			message = "Joker position doesn’t have a Joker owned by this player";
@@ -190,9 +189,10 @@ bool Board::loadPlayer(ifstream& player, int playerNum, int& lineNum)
 			return false;
 		}
 		Piece *soldier = new Piece(pt, joker, x, y, playerObj, false);
-		if (!AddPiece(*soldier))
+		if (!AddPiece(*soldier)) {
 			lineNum = lineCounter;
 			return false;
+		}
 	}
 	player.close();
 
@@ -230,6 +230,7 @@ bool Board::initBoard()
 		message = "Bad Positioning input file for player 2 - line " + to_string(lineNumber2);
 		return false;
 	}
+	return true;
 }
 
 void printLine() {
@@ -257,7 +258,8 @@ void Board::printBoard(string mode, int delay)
 			}
 			cout << endl;
 		}
-		cout << "-----------------------------------------" << endl;
+			cout << "-----------------------------------------" << endl;
+		
 	}
 	Sleep(delay);
 }
@@ -294,18 +296,52 @@ void Board::printSquare(int i, int j, string mode) {
 	cout << " | ";
 }
 
+void Board::printBoard(ofstream& outfile)
+{
+	//printLine();
+	int i, j;
+	for (i = 0; i < 10; i++) {
+		outfile << "--------------------------------------------------" << endl;
+		outfile << "| ";
+		for (j = 0; j < 10; j++) {
+			printSquare(i, j, outfile);
+		}
+		outfile << endl;
+	}
+		outfile << "--------------------------------------------------" << endl;
+}
+
+void Board::printSquare(int i, int j,ofstream& outfile) {
+	char pieceType = ' ';
+	char player = ' ';
+	if (board[i][j][0]) {
+		pieceType = getPieceStringFromEnum((*(board[i][j][0])).getType());
+		player = '1';
+	}
+	if (board[i][j][1]) {
+		pieceType = getPieceStringFromEnum((*(board[i][j][1])).getType());
+		player = '2';
+	}
+	outfile << pieceType << player;
+	outfile << " | ";
+}
+
+
 Board::~Board()
 {
 	for (int i = 0; i < m; i++) {
-		for (int j = 0; j < n; j++)
+		for (int j = 0; j < n; j++) {
+			for (int k = 0; k < 2; k++)
+				delete[]board[i][j][k];
 			delete[]board[i][j];
+		}
 		delete[]board[i];
 	}
 	delete[]board;
 }
 
 bool Board::scanBoard() { //return true if game isn't over
-	for (int i = 0; i < m; i++)
+	for (int i = 0; i < m; i++) {
 		for (int j = 0; j < n; j++)
 			if (board[i][j][0] != nullptr && board[i][j][1] != nullptr) {
 				Player* player1 = board[i][j][0]->getPlayer();
@@ -313,13 +349,13 @@ bool Board::scanBoard() { //return true if game isn't over
 				combat(i, j);
 				winner = checkForWinner(player1, player2);
 			}
-
+	}
 	return winner == 0 && message.size() == 0;
 }
 
-void Board::combat(int x, int y) {
-	Piece* piece1 = board[x][y][0];
-	Piece* piece2 = board[x][y][1];
+void Board::combat(int y, int x) {
+	Piece* piece1 = board[y][x][0];
+	Piece* piece2 = board[y][x][1];
 	Player* player1 = piece1->getPlayer();
 	Player* player2 = piece2->getPlayer();
 	Piece::PieceType t1 = piece1->getType();
@@ -331,35 +367,35 @@ void Board::combat(int x, int y) {
 
 	//combat
 	if ((t1 == Piece::PieceType::Bomb || t2 == Piece::PieceType::Bomb) || t1 == t2) {
-		removePiece(x, y, piece1);
-		removePiece(x, y, piece2);
+		removePiece(y, x, piece1);
+		removePiece(y, x, piece2);
 	}
 
 	if (t1 == Piece::PieceType::Flag && t2 != Piece::PieceType::Flag) {
-		removePiece(x, y, piece1);
+		removePiece(y, x, piece1);
 	}
 	if (t2 == Piece::PieceType::Flag && t1 != Piece::PieceType::Flag) {
-		removePiece(x, y, piece2);
+		removePiece(y, x, piece2);
 	}
 
 	if ((t1 == Piece::PieceType::Rock && t2 == Piece::PieceType::Scissors) ||
 		(t1 == Piece::PieceType::Scissors && t2 == Piece::PieceType::Papper) ||
 		(t1 == Piece::PieceType::Papper && t2 == Piece::PieceType::Rock)) {
-		removePiece(x, y, piece2);
+		removePiece(y, x, piece2);
 	}
 	if ((t2 == Piece::PieceType::Rock && t1 == Piece::PieceType::Scissors) ||
 		(t2 == Piece::PieceType::Scissors && t1 == Piece::PieceType::Papper) ||
 		(t2 == Piece::PieceType::Papper && t1 == Piece::PieceType::Rock)) {
-		removePiece(x, y, piece1);
+		removePiece(y, x, piece1);
 	}
 }
 
-void Board::removePiece(int x, int y, Piece* piece) {
+void Board::removePiece(int y, int x, Piece* piece) {
 	Player* player = piece->getPlayer();
 	int playerNum = player->getPlayerNumber() - 1;
 
 	//remove piece
-	board[x][y][playerNum] = nullptr;
+	board[y][x][playerNum] = nullptr;
 
 	//update total
 	if (piece->isJoker()) {

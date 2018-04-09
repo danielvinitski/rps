@@ -5,6 +5,10 @@
 #include "main.h"
 #include "move.h"
 using namespace std;
+const string mode = "show-all";
+const int delay = 100;
+const int N =10;
+const int M = 10;
 
 Move* getMove(int _plyer, string line) {
 	char inputLine[11];
@@ -83,12 +87,19 @@ Move* getMove(int _plyer, string line) {
 	}
 }
 
+void generateOutput(Board board) {
+	ofstream outFIle("rps.output", ofstream::out);
+	outFIle << "Winner: " << board.getWinner() << endl;
+	outFIle << "Reason: " << board.getMessage() << endl << endl;
+	board.printBoard(outFIle);
+}
+
 int main() {
 	int winner;
-	Board board = Board(10, 10);
-	if (!board.initBoard()) {
+	Board board = Board(N, M);
+	if (board.initBoard()) {
 		board.scanBoard();
-		board.printBoard("show-all", 50);
+		board.printBoard(mode, delay);
 		string line;
 		int fileLineCounter1 = 0, fileLineCounter2 = 0;
 		int playedMoves = 0;
@@ -98,7 +109,7 @@ int main() {
 		ifstream player2MoveFile("player2.rps_moves");
 		Move* move1 = nullptr;
 		Move* move2 = nullptr;
-		while (!board.getWinner() && !(finishMove1 && finishMove2)) {
+		while ((board.getWinner()==-1 || board.getWinner() == 0) && !(finishMove1 && finishMove2)) {
 			if (!finishMove1) {
 				fileLineCounter1 += 1;
 				getline(player1MoveFile, line);
@@ -107,6 +118,15 @@ int main() {
 				}
 				if (line.compare("/n") != 0) {
 					move1 = getMove(0, line);
+				}
+				else {
+					cout << "empty line in " << fileLineCounter1;
+					move1 = nullptr;
+				}
+				if (move1 != nullptr) {
+					if (!board.MovePiece(move1)) break;
+					if (!board.scanBoard()) break;
+					board.printBoard(mode, delay);
 				}
 			}
 			if (!finishMove2) {
@@ -117,6 +137,15 @@ int main() {
 				}
 				if (line.compare("/n") != 0) {
 					move2 = getMove(1, line);
+				}
+				else {
+					cout << "empty line in " << fileLineCounter2;
+					move2 = nullptr;
+				}
+				if (move2 != nullptr) {
+					if (!board.MovePiece(move2)) break;
+					if (!board.scanBoard()) break;
+					board.printBoard(mode, delay);
 				}
 			}
 			if (move1 == nullptr && move2 == nullptr) {
@@ -134,27 +163,17 @@ int main() {
 				board.setMessage("Bad Positioning input file for both players - player 2: line " + to_string(fileLineCounter2) + ", player 2: line <Y>");
 				break;
 			}
-			else {
-				if (!board.MovePiece(move1)) break;
-				if (!board.scanBoard()) break;
-				board.printBoard("show-all", 50);
-				if (!board.MovePiece(move2)) break;
-				if (!board.scanBoard()) break;
-				board.printBoard("show-all", 50);
-
-			}
 		}
 	}
 	winner = board.getWinner();
 	string message = board.getMessage();
-	if (winner==0) {
+	if (winner==-1 || winner == 0) {
 		if (board.getMessage().size() == 0) {
 			board.setMessage("A tie - both Moves input files done without a winner");
+			board.setWinner(0);
 		}
 	}
-	else {
-		cout << board.getMessage() << endl;
-	}
+	generateOutput(board);
 }
 
 

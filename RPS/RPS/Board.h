@@ -21,6 +21,8 @@ public:
 	bool AddPiece(Piece& piece);
 	bool MovePiece(Move* move);
 	bool initBoard();
+	void printBoard(ofstream& outfile);
+	void printSquare(int i, int j,ofstream& outfile);
 	void printBoard(std::string mode, int delay);
 	void printSquare(int i, int j, string mode);
 	string getMessage();
