@@ -158,30 +158,48 @@ bool Board::loadPlayer(ifstream& player, int playerNum, int& lineNum)
 	Piece::PieceType pt;
 	Player* playerObj = new Player(playerNum);
 	int lineCounter = 0;
-	char line[10];
+	string line;
+	char X, Y, J, p;
+	int i;
 	while (!feof) {
-		player.getline(line, 10);
+		char piceLine[] = { 'e', 'e', 'e', 'e' };
+		getline(player, line);
 		lineCounter += 1;
 		if (player.eof()) {
 			feof = true;
 		}
-		if (!(line[0] == 'R' || line[0] == 'S' || line[0] == 'P' || line[0] == 'J' || line[0] == 'B' || line[0] == 'F')) { //check the first letter of the input
+		if (line.size() == 0 || line.compare("\n") == 0)
+			continue;
+		i = 0;
+		for (char& c : line) {
+			if (c != ' ') {
+				if (i < 4) {
+					piceLine[i] = c;
+					i += 1;
+				}
+				else {
+					cout << "player " << playerNum << "to many chars in "<< lineCounter <<"line" << endl;
+					return false;
+				}
+			}
+		}
+		if (!(piceLine[0] == 'R' || piceLine[0] == 'S' || piceLine[0] == 'P' || piceLine[0] == 'J' || piceLine[0] == 'B' || piceLine[0] == 'F')) { //check the first letter of the input
 			cout << "Bad format in line " << to_string(lineCounter) << endl;
 			message = "Bad format in player " + to_string(playerNum) + " init file";
 			lineNum = lineCounter;
 			return false;
 		}
-		if (line[0] == 'J') {
+		if (piceLine[0] == 'J') {
 			joker = true;
-			pt = getPieceTypeFromChar(line[6]);
+			pt = getPieceTypeFromChar(piceLine[3]);
 		}
 		else {
 			joker = false;
-			pt = getPieceTypeFromChar(line[0]);
+			pt = getPieceTypeFromChar(piceLine[0]);
 		}
-		if (line[2] <= '9' && line[2] >= '0' && line[4] <= '9' && line[4] >= '0') {
-			x = line[2] - '0';
-			y = line[4] - '0';
+		if (piceLine[1] <= '9' && piceLine[1] >= '0' && piceLine[2] <= '9' && piceLine[2] >= '0') {
+			x = piceLine[1] - '0';
+			y = piceLine[2] - '0';
 		}else{
 			cout << "Bad format in line " << to_string(lineCounter) << endl;
 			message = "Bad format in player " + to_string(playerNum) + " init file";
