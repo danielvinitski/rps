@@ -10,8 +10,8 @@ class Move
 	char newPieceType='R';
 
 public:
-	Move(int player, char curX, char curY, char tarX, char tarY, bool j);
-	Move(int player, char curX, char curY, char tarX, char tarY, bool j, char jX, char jY,char newType);
+	Move(int player, int curX, int curY, int tarX, int tarY, bool j);
+	Move(int player, int curX, int curY, int tarX, int tarY, bool j, int jX, int jY,char newType);
 	char getNewPieceType() { return newPieceType; }
 	int getCurrentX() {return currentX;}
 	int getCurrentY() {return currentY;}

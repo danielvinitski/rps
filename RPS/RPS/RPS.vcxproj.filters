@@ -57,5 +57,7 @@
   <ItemGroup>
     <None Include="player2.rps_board" />
     <None Include="player1.rps_board" />
+    <None Include="player1.rps_moves" />
+    <None Include="player2.rps_moves" />
   </ItemGroup>
 </Project>
