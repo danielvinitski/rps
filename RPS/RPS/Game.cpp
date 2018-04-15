@@ -150,5 +150,4 @@ void Game::start(int n, int m, int delay, string mode) {
 	}
 	cout << endl <<"Game Over!";
 	generateOutput(board);
-	delete gameBoard;
 }
