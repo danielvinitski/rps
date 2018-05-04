@@ -1,6 +1,7 @@
 #include "Board.h"
 #include "Piece.h"
 #include "Move.h"
+#include "main.h"
 #include <string>
 #include<iostream>
 #include<fstream>
@@ -164,7 +165,6 @@ bool Board::moveJockerPieceCheck(Move* move) {
 }
 
 bool Board::MovePiece(Move* move) {
-	Piece *jockerToChange;
 	Piece *pieceToMove = movePieceCheck(move);
 	if (pieceToMove != nullptr) {
 		board[move->getCurrentY()][move->getCurrentX()][move->getplayer() - 1] = nullptr;
@@ -241,6 +241,8 @@ bool Board::checkInitBoard(const bool& initfile1, const int& lineNumber1, const 
 	return true;
 }
 
+
+
 bool Board::initBoard()
 {
 	int lineNumber1=0;
@@ -248,9 +250,20 @@ bool Board::initBoard()
 	bool initfile1, initfile2;
 	//read file of player a
 	ifstream player1File("player1.rps_board");
-
 	//read file of player b
 	ifstream player2File("player2.rps_board");
+	//check if board fiel exist
+	switch (checkFileExist(player1File, player2File)) {
+		case 1:
+			cout << "player1.rps_board file not exist!" << endl;
+			return false;
+		case 2:
+			cout << "player2.rps_board file not exist!" << endl;
+			return false;
+		case 3:
+			cout << "player1.rps_board and player2.rps_board files not exist!" << endl;
+			return false;
+	}
 
 	initfile1 = loadPlayer(player1File, 1, lineNumber1);
 	player1File.close();

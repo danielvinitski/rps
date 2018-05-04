@@ -117,6 +117,21 @@ void Game::playGame(Board& board, const int& delay, const string& mode) {
 	bool finishMove1 = false, finishMove2 = false;
 	ifstream player1MoveFile("player1.rps_moves");
 	ifstream player2MoveFile("player2.rps_moves");
+	switch (checkFileExist(player1MoveFile, player2MoveFile)) {
+	case 1:
+		cout << "player1.rps_moves file not exist!" << endl;
+		finishMove1 = true;
+		break;
+	case 2:
+		cout << "player2.rps_moves file not exist!" << endl;
+		finishMove2 = true;
+		break;
+	case 3:
+		cout << "player1.rps_moves and player2.rps_moves files not exist!" << endl;
+		finishMove1 = true;
+		finishMove2 = true;
+		break;
+	}
 	while (!(finishMove1 && finishMove2)) {
 		if (!finishMove1) {
 			finishMove1 = playMove(1, fileLineCounter1, player1MoveFile, board, delay, mode);
@@ -150,5 +165,4 @@ void Game::start(int n, int m, int delay, string mode) {
 	}
 	cout << endl <<"Game Over!";
 	generateOutput(board);
-	delete gameBoard;
 }

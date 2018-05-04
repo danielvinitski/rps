@@ -47,6 +47,17 @@ string initParams(const int& argc,char *argv[], string& mode, int& delay ) {
 	return "";
 }
 
+int checkFileExist(ifstream& player1File, ifstream& player2File) {
+	int i = 0;
+	if (!player1File.good()) {
+		i += 1;
+	}
+	if (!player2File.good()) {
+		i += 2;
+	}
+	return i;
+}
+
 int main(int argc, char *argv[]) {
 	int delay = 50;
 	const int N = 10;

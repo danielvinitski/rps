@@ -1,5 +1,6 @@
 #include "Move.h"
 #include "Board.h"
+#include "main.h"
 
 #pragma once
 class Game

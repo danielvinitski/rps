@@ -1,6 +1,8 @@
 #include "Piece.h"
 #include <string>
 #include "Move.h"
+#include "main.h"
+
 using namespace std;
 
 #pragma once
@@ -22,6 +24,7 @@ class Board
 	void Board::setOppositeWinner(const int& player);
 	Piece* Board::movePieceCheck(Move* move);
 	bool Board::moveJockerPieceCheck(Move* move);
+	
 public:
 	Board(int m, int n);
 	bool loadPlayer(ifstream& player, int playerNum, int& lineNum);
