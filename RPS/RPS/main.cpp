@@ -1,6 +1,6 @@
 /*
-דניאל ויניצקי 203245162
-אופיר סונסינו 305346710
+Daniel Vinitski 203245162
+Ofir Sonsino 305346710
 */
 
 #include<iostream>
