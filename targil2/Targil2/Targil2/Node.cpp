@@ -2,24 +2,46 @@
 #include<iostream>
 
 
-Node::Node(int data)
+//constructor for Node
+Node::Node(CalendarEvent *data)
 {
-	key = min2 = data;
-	min3 = -1;
+	key = data;
+	min2 = min3 = -1;
+	parent = this->left = this->mid = this->right = nullptr;
 }
-
 
 Node::~Node()
 {
 }
 
 
-Node* Node::Find(int data) {
+//find node function. exactTime states whether to look for event that actually starts at startTime, or not
+Node* Node::Find(time_t startTime, bool exactTime) {
 	if (isLeaf()) {
-		if (key == data) {
-			return this;
+
+		if (exactTime) {
+			//check if event overlap the starttime
+			if (key->getStartTime() <= startTime &&
+				(key->getStartTime() + key->getDuration()) >= startTime) {
+				return this;
+			}
+			else
+				return nullptr;
 		}
 		else {
+
+			//check start time of the 3 possible events in leafs
+			if (parent->left->key->getStartTime() >= startTime) {
+				return parent->left;
+			}
+			else if (parent->mid != nullptr && parent->mid->key->getStartTime() >= startTime) {
+				return parent->mid;
+			}
+			else if (parent->right != nullptr && parent->right->key->getStartTime() >= startTime) {
+				return parent->right;
+			}
+
+			//non found
 			return nullptr;
 		}
 	}
@@ -27,112 +49,118 @@ Node* Node::Find(int data) {
 	else { //not a leaf - keep travelling on tree
 
 		Node* nextNode;
-		if (right != nullptr && data >= min3) {
+		if (min3 != -1 && startTime >= min3) {
 			nextNode = right;
 		}
-		else if (data >= min2) {
+		else if (min2 != -1 && startTime >= min2) {
 			nextNode = mid;
 		}
 		else {
 			nextNode = left;
 		}
 
-		return nextNode->Find(data);
+		return nextNode ? nextNode->Find(startTime, exactTime) : nullptr;
 	}
 }
 
-
-void Node::Insert(Node *newNode) {
+//Insert Node under current node
+void Node::Insert(Node *newNode, time_t minStartTime) {
+	//go to the right function by number of children
 	if (right == nullptr) {
 		if (mid == nullptr) {
 			//insert to a node with 1 child
-			insertToNode1Child(newNode);
+			insertToNode1Child(newNode, minStartTime);
 		}
 		else {
 			//insert to a node with 2 children
-			insertToNode2Children(newNode);
+			insertToNode2Children(newNode, minStartTime);
 		}
 	}
 	else {
 		//insert to a node with 3 children
-		insertToNode3Children(newNode);
+		insertToNode3Children(newNode, minStartTime);
 	}
 }
 
-void Node::insertToNode1Child(Node *newChild) {
-	int newKey = newChild->getSmallest();
+//insert node when only 1 child
+void Node::insertToNode1Child(Node *newChild, time_t minStartTime) {
 	newChild->parent = this;
 
-	if (newKey < left->getSmallest()) {
+	if (newChild->min2 < left->min2) {
 		//insert new child to left
 		mid = left;
 		left = newChild;
-		min2 = mid->key;//smallaest
+		min2 = mid->getSmallest();
 	}
 	else {
 		//insert new child to mid
 		mid = newChild;
-		min2 = newKey;
+		min2 = newChild->min2;
 	}
 }
 
-void Node::insertToNode2Children(Node *newChild) {
-	int newKey = newChild->key;
+//insert node when 2 children
+void Node::insertToNode2Children(Node *newChild, time_t minStartTime) {
+	time_t newKey = newChild->min2;
 	newChild->parent = this;
 
-	if (newKey < left->key) {
+	if (newKey < left->min2) {
 		//insert new child to left
 		right = mid;
 		mid = left;
 		left = newChild;
-		min2 = mid->key;//smallaest
-		min3 = right->key;
+		min3 = min2;
+		min2 = mid->getSmallest();
 
-		updateParentMin(newKey);
+		updateParentMin(minStartTime);
 	}
-	else if (newKey < mid->key) {
+	else if (newKey < mid->min2) {
 		//insert new child to mid
 		right = mid;
 		mid = newChild;
-		min2 = newKey;
-		min3 = right->key;
+		min3 = min2;
+		min2 = minStartTime;
 	}
 	else {
 		//insert new child to right
 		right = newChild;
-		min3 = newKey;
+		min3 = minStartTime;
 	}
 }
 
-void Node::insertToNode3Children(Node *newChild) {
-	int newKey = newChild->key;
+//insert node when 3 children
+void Node::insertToNode3Children(Node *newChild, time_t minStartTime) {
+	time_t newKey = newChild->min2;
 
-	Node* splitNode = new Node(-1);
+	//define a split node, to make room for the new node
+	Node* splitNode = new Node(new CalendarEvent());
+	time_t splitSmallest = -1;
 	splitNode->parent = parent;
 
-	if (newKey < left->key || newKey < mid->key) {
+	if (newKey < left->min2 || newKey < mid->min2) {
 		//insert newChild in current node
+		splitSmallest = min2;
 		splitNode->left = mid;
 		splitNode->mid = right;
-		splitNode->min2 = right->key;
+		splitNode->min2 = min3;
 
 		//update parents
 		mid->parent = splitNode;
 		right->parent = splitNode;
 		newChild->parent = this;
 
-		if (newKey < left->key) {
+		if (newKey < left->min2) {
 			//insert newChild to left
 			mid = left;
 			left = newChild;
 
-			min2 = left->key; //smallaest
-			updateParentMin(newKey);
+			min2 = mid->getSmallest();
+			updateParentMin(minStartTime);
 		}
 		else {
 			//insert newChild to mid
 			mid = newChild;
-			min2 = newKey;
+			min2 = minStartTime;
 		}
 	}
 	else {
@@ -142,15 +170,17 @@ void Node::insertToNode3Children(Node *newChild) {
 
 		if (newKey < right->min2) {
 			//insert newChild to left
+			splitSmallest = minStartTime;
 			splitNode->left = newChild;
 			splitNode->mid = right;
 			splitNode->min2 = min3;
 		}
 		else {
 			//insert newChild to mid
+			splitSmallest = min3;
 			splitNode->left = right;
 			splitNode->mid = newChild;
-			splitNode->min2 = newKey;
+			splitNode->min2 = minStartTime;
 		}
 	}
 
@@ -159,125 +189,44 @@ void Node::insertToNode3Children(Node *newChild) {
 
 	if (parent->parent == nullptr) {
 		//create new root
-		Node *newRoot = new Node(-1);
+		Node *newRoot = new Node(new CalendarEvent());
 
 		parent->left = newRoot;
 		newRoot->parent = parent;
 		newRoot->left = this;
 		parent = newRoot;
-
-		/*
-		//min2 = newNode;
-		newRoot->parent = nullptr;
-		newRoot->left = this;
-		newRoot->mid = splitNode;
-		splitNode->parent = newRoot;
-		parent = newRoot;*/
 	}
 
-	parent->Insert(splitNode);
+	parent->Insert(splitNode, splitSmallest);
 }
 
-void Node::Delete(int data) {
-	//remove leaf
-	if (right->key == data) {
-		right = nullptr;
-		min3 = -1;
-	}
-	else if (mid->key == data) {
-		mid = nullptr;
-		min3 = -1;
-	}
-	else if (left->key == data) {
-		left = nullptr;
-	}
-
-	//now rearrange tree
-	if (numChildren() == 2) {
-		if (right==nullptr) {
-			return;
-		}
-		else if (mid == nullptr) {
-			mid = right;
-			right = nullptr;
-			min2 = mid->key;
-		}
-		else {
-			left = mid;
-			mid = right;
-			right = nullptr;
-			min2 = mid->key;
-		}
-		//need to update min2 3
-	}
-	else 
-	{
-		//numChildren is 1 - leaf holds that child
-		Node* leaf = left;
-		if(mid != nullptr) leaf = mid;
-		else if (right != nullptr) leaf = right;
-
-		//take one item from sibiling with 3 children
-		if (parent->left->numChildren() == 3 && parent->mid==this) {
-			left = parent->left->right;
-			mid = leaf;
-		}
-		else if (parent->mid->numChildren() == 3) {
-			if (parent->right == this) {
-				//take the right one
-				if (left != nullptr) {
-					mid = left;
-				}
-				left = parent->mid->right;
-				parent->mid->right = nullptr;
-				parent->mid->min3 = -1;
-			}
-			else {
-				//take the left one
-				if (mid!= nullptr) {
-					left = mid;
-				}
-				mid = parent->mid->left;
-				parent->mid->left = parent->mid->mid;
-				parent->mid->mid = parent->mid->right;
-				parent->mid->min2 = parent->mid->mid->key;
-			}
-		}
-		else if (parent->right->numChildren() == 3 && parent->mid == this) {
-			left = leaf;
-			mid = parent->right->left;
-			parent->right->left = parent->right->mid;
-			parent->right->mid = parent->right->right;
-			parent->right->right = nullptr;
-		}
-
-		//else move child
-	}
-}
-
-void Node::updateParentMin(int data) {
+//update parents with new min time
+void Node::updateParentMin(time_t newMin) {
 	if (parent == nullptr) return;
 
 	// Update the parent nodes
 	if (parent->left == this) {
 		if (parent->parent != nullptr) {
-			parent->updateParentMin(data);
+			parent->updateParentMin(newMin);
 		}
 	}
 	else if (parent->mid == this) {
-		parent->min2 = data;
+		parent->min2 = newMin;
 	}
 	else {
-		parent->min3 = data;
+		parent->min3 = newMin;
 	}
 }
 
-int Node::getSmallest() {
+//get the smallest min value of current sub tree
+time_t Node::getSmallest() {
+	//travel to the leftest leaf
 	Node *node = this;
 	while (!node->isLeaf()) node = node->left;
-	return node->key;
+	return node->key->getStartTime();
 }
 
+//get number of children of current node
 int Node::numChildren() {
 	int c = 0;
 	if (right != nullptr) c++;
@@ -286,19 +235,74 @@ int Node::numChildren() {
 	return c;
 }
 
+//check if current node is a leaf or not
 bool Node::isLeaf() {
 	return left == nullptr;
 }
 
+//print current node
 void Node::print() {
 	if (isLeaf()) {
 		//print
-		cout << key << " ";
+		key->print();
 	}
 	else {
 		//print sorted, left to right
 		if (left != nullptr) left->print();
 		if (mid != nullptr) mid->print();
 		if (right != nullptr) right->print();
+	}
+}
+
+//delete first leaf under current sub tree
+CalendarEvent *Node::DeleteFirstLeaf() {
+	
+	//travel to leftest leaf
+	Node *node = this;
+	while (!node->isLeaf()) {
+		node = node->left;
+	}
+	
+	//update parents after deletion
+	fixTreeAfterDeletion(node->parent);
+	
+	//keep original value to return
+	CalendarEvent *event = node->key;
+
+	//clean memory
+	delete node;
+
+	return event;
+}
+
+//update values from curren node to root when deleting a node
+void Node::fixTreeAfterDeletion(Node *node) const {
+	//3 children before deletion
+	if (node->right != nullptr) {
+		//moving each node step to the right
+		node->left = node->mid;
+		node->mid = node->right;
+		node->right = nullptr;
+
+		//update min values
+		node->min2 = node->mid->getSmallest();
+		node->min3 = -1;
+	}
+	//2 children before deletion
+	else if (node->mid != nullptr) {
+		//move to the right
+		node->left = node->mid;
+		
+		//update min values
+		node->mid = nullptr;
+		node->min2 = -1;
+	}
+	//1 child before deletion
+	else {
+		//delete only if not tree root
+		if (node->parent != nullptr) {
+			node->left = nullptr;
+			fixTreeAfterDeletion(node->parent);
+		}
 	}
 }

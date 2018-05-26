@@ -9,6 +9,7 @@
 #include <iostream>
 #include <string>
 #include <time.h>
+#include <climits>
 using namespace std;
 
 #include "CalendarTree.h"
@@ -23,7 +24,7 @@ using namespace std;
 *		 and it is follows by appropriate parameters (e.g., time for Find)
 *        as this is a test program, there is little care for unexpected inputs.
 *  OUTPUT:  the results of the operations are printed to stdout in readable form.
-*
+*/
 int main(int argc, char* argv[])
 {
 	CalendarTree myCalendar;
@@ -37,6 +38,7 @@ int main(int argc, char* argv[])
 
 	while ((inst = cin.get()) != 'Q')
 	{
+		munchLine = true;
 		switch (inst) {
 		case 'D':
 			ev = myCalendar.deleteFirst();
@@ -106,7 +108,7 @@ int main(int argc, char* argv[])
 		default:
 			// wrong line? skip it
 			cout << "what?\n";
-			scanf("*[^\n]");
+			scanf_s("*[^\n]");
 		};
 		if (munchLine) cin.ignore(INT_MAX, '\n');
 		ev = NULL; // to be clean, since ev is only temporary.
@@ -115,33 +117,3 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-*/
-
-
-int main(int argc, char* argv[]) {
-
-	//CalendarTree *tree = new CalendarTree();
-	//tree->Insert(4);
-	//tree->Delete(4);
-	//tree->print(tree->root->left);
-
-
-	CalendarTree *tree = new CalendarTree();
-	tree->Insert(10);
-	tree->Insert(8);
-	tree->Insert(2);
-	tree->Insert(3);
-	tree->Insert(7);
-	tree->Insert(6);
-	tree->Insert(4);
-	tree->Insert(20);
-
-	
-	//tree->print(tree->root->left);
-	//tree->Insert(3);
-	//
-	//tree->print(tree->root->left);
-	////tree->Insert(7);
-	////tree->print(tree->root->left);
-	tree->printSorted();
-}

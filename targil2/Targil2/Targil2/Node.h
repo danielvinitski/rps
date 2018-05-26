@@ -1,26 +1,28 @@
-#include "calendarEvent.h"
+#include "CalendarEvent.h"
 #pragma once
 
 class Node
 {
-	void insertToNode1Child(Node *newChild);
-	void insertToNode2Children(Node *newChild);
-	void insertToNode3Children(Node *newChild);
-	void updateParentMin(int data);
-	int getSmallest();
+	void insertToNode1Child(Node *newChild, time_t minStartTime);
+	void insertToNode2Children(Node *newChild, time_t minStartTime);
+	void insertToNode3Children(Node *newChild, time_t minStartTime);
+	void updateParentMin(time_t newMin);
+	time_t getSmallest();
 	int numChildren();
+	void fixTreeAfterDeletion(Node *node) const;
 
 public:
 	Node *parent;
 	Node *left, *mid, *right;
-	int min2, min3;
-	int key;
+	time_t min2, min3;
+	CalendarEvent *key;
 
-	Node(int data);
+	Node(CalendarEvent *data);
 	~Node();
-	Node *Find(int data);
-	void Insert(Node *newChild);
-	void Delete(int data);
+
+	Node *Find(time_t startTime, bool exactTime);
+	void Insert(Node *newChild, time_t minStartTime);
+	CalendarEvent *DeleteFirstLeaf();
 	bool isLeaf();
 	void print();
 };

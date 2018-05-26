@@ -2,25 +2,28 @@
 #include<iostream>
 
 
+//constructor
 CalendarTree::CalendarTree()
 {
-	root = new Node(-1);
+	root = new Node(new CalendarEvent());
 	root->parent = nullptr;
-	root->left = new Node(-1);
+	root->left = new Node(new CalendarEvent());
 	root->left->parent = root;
 }
 
-
+//destructor
 CalendarTree::~CalendarTree()
 {
 }
 
+//prints the tree
 void CalendarTree::printSorted() {
-	root->print();
+	//skipping "dummy root"
+	root->left->print();
 }
 
-
-Node* CalendarTree::getParentForNewNode(Node *startFrom, int data) {
+//find closest potential parent of the needed value
+Node* CalendarTree::getParentForNewNode(Node *startFrom, CalendarEvent *data) {
 	//make sure didnt reach to the end of tree
 	if (startFrom == nullptr) {
 		return nullptr;
@@ -29,27 +32,34 @@ Node* CalendarTree::getParentForNewNode(Node *startFrom, int data) {
 	//travelling on tree
 	Node* node = startFrom;
 	while (!node->isLeaf()) {
-		if (node->min2 == data || node->min3 == data)
+		//key is already in tree, return null
+		if (node->min2 == data->getStartTime() || node->min3 == data->getStartTime())
 			return nullptr;
-		if (node->min2 == -1 || data < node->min2)
+		if (node->min2 == -1 || data->getStartTime() < node->min2)
 			node = node->left;
-		else if (node->min3 == -1 || data < node->min3)
+		else if (node->min3 == -1 || data->getStartTime() < node->min3)
 			node = node->mid;
 		else
 			node = node->right;
 	}
 
-	//data already in tree
-	if (node->key == data) {
+	//check if new data overlaps with existing events
+	if (node->min2 == data->getStartTime() ||
+		((data->getStartTime() < node->key->getStartTime()) &&
+			data->getStartTime() + data->getDuration() > node->key->getStartTime()) ||
+		((data->getStartTime() > node->key->getStartTime()) &&
+			node->key->getStartTime() + node->key->getDuration() > data->getStartTime())) {
 		return nullptr;
 	}
-	else {
-		return node->parent;
-	}
+	
+	//if key found, return parent
+	return node->parent;
 }
 
-void CalendarTree::Insert(int data) {
+//insert new value to tree
+CalendarEvent* CalendarTree::insert(CalendarEvent *data) {
 	Node* newNode = new Node(data);
+	newNode->min2 = data->getStartTime();
 
 	//search for a parent node
 	Node* parent = root->left;
@@ -63,40 +73,33 @@ void CalendarTree::Insert(int data) {
 		parent = getParentForNewNode(parent, data);
 		//data already in tree - no need to add
 		if (parent == nullptr) {
-			return;
+			return nullptr;
 		}
 
-		//data isn't on tree - insert new node
-		parent->Insert(newNode);
+		//data isn't on tree - insert new node to its parent
+		parent->Insert(newNode, data->getStartTime());
 	}
+
+	return data;
 }
 
-
-void CalendarTree::Delete(int data) {
-	Node *parent = getParentForNewNode(root->left, data);
-	parent->Delete(data);
+//calls find function on root node with exactTime=true
+CalendarEvent *CalendarTree::eventAt(time_t startTime) {
+	Node *node = root->Find(startTime, true);
+	return node ? node->key : nullptr;
 }
 
-//debug
-void CalendarTree::print(Node *node, int tabs) {
-	// Recursively print the subtree starting from the given node
+//calls find function on root node with exactTime=false
+CalendarEvent *CalendarTree::eventAfter(time_t startTime) {
+	Node *node = root->Find(startTime, false);
+	return node ? node->key : nullptr;
+}
 
-	for (int i = 0; i < tabs; ++i) {
-		cout << "\t";
-	}
+//calls delete first leaf function on root node
+CalendarEvent *CalendarTree::deleteFirst() {
+	return root->DeleteFirstLeaf();
+}
 
-	if (node == nullptr) {
-		cout << "`--> NULL" << endl;
-		return;
-	}
-
-	cout << "`--> "
-		<< ": ( " << node->min2 << ", " << node->min3 << ")" << endl;
-
-	if (!node->isLeaf()) {
-		++tabs;
-		print(node->left, tabs);
-		print(node->mid, tabs);
-		print(node->right, tabs);
-	}
+int CalendarTree::numBefore(time_t i) {
+	return -1; //not implemented
 }
