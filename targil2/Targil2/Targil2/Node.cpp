@@ -226,15 +226,6 @@ time_t Node::getSmallest() {
 	return node->key->getStartTime();
 }
 
-//get number of children of current node
-int Node::numChildren() {
-	int c = 0;
-	if (right != nullptr) c++;
-	if (mid != nullptr) c++;
-	if (left != nullptr) c++;
-	return c;
-}
-
 //check if current node is a leaf or not
 bool Node::isLeaf() {
 	return left == nullptr;
@@ -276,7 +267,7 @@ CalendarEvent *Node::DeleteFirstLeaf() {
 }
 
 //update values from curren node to root when deleting a node
-void Node::fixTreeAfterDeletion(Node *node) const {
+void Node::fixTreeAfterDeletion(Node *node) {
 	//3 children before deletion
 	if (node->right != nullptr) {
 		//moving each node step to the right

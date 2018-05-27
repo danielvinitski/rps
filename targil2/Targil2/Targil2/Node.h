@@ -8,8 +8,7 @@ class Node
 	void insertToNode3Children(Node *newChild, time_t minStartTime);
 	void updateParentMin(time_t newMin);
 	time_t getSmallest();
-	int numChildren();
-	void fixTreeAfterDeletion(Node *node) const;
+	void fixTreeAfterDeletion(Node *node);
 
 public:
 	Node *parent;
